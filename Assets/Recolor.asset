@@ -30,31 +30,31 @@ MonoBehaviour:
     value: 1
   edgeColor:
     overrideState: 1
-    value: {r: 0, g: 0, b: 0, a: 1}
+    value: {r: 0, g: 0, b: 0, a: 0.79607844}
   edgeSource:
     overrideState: 1
-    value: 0
+    value: 2
   edgeThreshold:
     overrideState: 1
-    value: 0.566
+    value: 0.213
   edgeContrast:
     overrideState: 1
-    value: 0.571
+    value: 0.894
   fillGradient:
     overrideState: 1
     value:
       serializedVersion: 2
-      key0: {r: 1, g: 0, b: 0, a: 1}
-      key1: {r: 0.27525544, g: 1, b: 0, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
+      key0: {r: 0, g: 0.043338213, b: 0.2735849, a: 1}
+      key1: {r: 0.2028302, g: 0.33412904, b: 1, a: 1}
+      key2: {r: 1, g: 0.5048219, b: 0.042452812, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 24525
-      ctime1: 65535
-      ctime2: 0
+      ctime0: 15010
+      ctime1: 37659
+      ctime2: 65535
       ctime3: 0
       ctime4: 0
       ctime5: 0
@@ -69,7 +69,7 @@ MonoBehaviour:
       atime6: 0
       atime7: 0
       m_Mode: 1
-      m_NumColorKeys: 2
+      m_NumColorKeys: 3
       m_NumAlphaKeys: 2
   fillOpacity:
     overrideState: 1
