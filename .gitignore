@@ -1,0 +1,20 @@
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Code Editors
+.idea
+.vscode
+*.csproj
+*.sln
+*.swp
+
+# Unity
+/Library
+/Temp
+
+Assets/Plugins
+Assets/Plugins.meta
