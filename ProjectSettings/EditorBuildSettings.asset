@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Test.unity
+    path: Assets/Recolor.unity
+    guid: 76dfb9cb08dbf2843b915b978d69e410
+  - enabled: 1
+    path: Assets/Streak.unity
     guid: ac6c77e2b625b0b4aa659e7e786cedf7
   m_configObjects: {}

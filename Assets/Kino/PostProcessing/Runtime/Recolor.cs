@@ -10,9 +10,6 @@ namespace Kino.PostProcessing
     [System.Serializable]
     public sealed class EdgeSourceParameter : ParameterOverride<EdgeSource> {}
 
-    [System.Serializable]
-    public sealed class GradientParameter : ParameterOverride<Gradient> {}
-
     #endregion
 
     #region Effect settings
@@ -21,23 +18,18 @@ namespace Kino.PostProcessing
     [PostProcess(typeof(RecolorRenderer), PostProcessEvent.BeforeStack, "Kino/Recolor")]
     public sealed class Recolor : PostProcessEffectSettings
     {
-        public ColorParameter edgeColor =
-            new ColorParameter { value = new Color(0, 0, 0, 0) };
+        public ColorParameter edgeColor = new ColorParameter { value = new Color(0, 0, 0, 0) };
 
-        public EdgeSourceParameter edgeSource =
-            new EdgeSourceParameter { value = EdgeSource.Depth };
+        public EdgeSourceParameter edgeSource = new EdgeSourceParameter { value = EdgeSource.Depth };
 
-        [Range(0, 1)] public FloatParameter edgeThreshold =
-            new FloatParameter { value = 0.5f };
+        [Range(0, 1)] public FloatParameter edgeThreshold = new FloatParameter { value = 0.5f };
 
-        [Range(0, 1)] public FloatParameter edgeContrast =
-            new FloatParameter { value = 0.5f };
+        [Range(0, 1)] public FloatParameter edgeContrast = new FloatParameter { value = 0.5f };
 
         public GradientParameter fillGradient =
-            new GradientParameter{ value = new Gradient() };
+            new GradientParameter{ value = GradientUtility.DefaultGradient };
 
-        [Range(0, 1)] public FloatParameter fillOpacity =
-            new FloatParameter { value = 0 };
+        [Range(0, 1)] public FloatParameter fillOpacity = new FloatParameter { value = 0 };
     }
 
     #endregion
@@ -53,13 +45,7 @@ namespace Kino.PostProcessing
             internal static readonly int FillOpacity = Shader.PropertyToID("_FillOpacity");
         }
 
-        int[] _fillKeyIDs;
-
-        Vector4 KeyToVector(GradientColorKey key)
-        {
-            var c = key.color.linear;
-            return new Vector4(c.r, c.g, c.b, key.time);
-        }
+        GradientColorKey[] _gradientCache;
 
         Vector2 EdgeThresholdVector {
             get {
@@ -79,13 +65,19 @@ namespace Kino.PostProcessing
 
         public override void Init()
         {
-            _fillKeyIDs = new int[8];
-            for (var i = 0; i < 8; i++)
-                _fillKeyIDs[i] = Shader.PropertyToID("_FillKey" + i);
+        #if !UNITY_EDITOR
+            // At runtime, copy gradient color keys only once on initialization.
+            _gradientCache = settings.fillGradient.value.colorKeys;
+        #endif
         }
 
         public override void Render(PostProcessRenderContext context)
         {
+        #if UNITY_EDITOR
+            // In editor, copy gradient color keys every frame.
+            _gradientCache = settings.fillGradient.value.colorKeys;
+        #endif
+
             var cmd = context.command;
             cmd.BeginSample("Recolor");
 
@@ -93,16 +85,10 @@ namespace Kino.PostProcessing
             sheet.properties.SetColor(ShaderIDs.EdgeColor, settings.edgeColor);
             sheet.properties.SetVector(ShaderIDs.EdgeThresholds, EdgeThresholdVector);
             sheet.properties.SetFloat(ShaderIDs.FillOpacity, settings.fillOpacity);
-
-            var colorKeys = settings.fillGradient.value.colorKeys;
-            for (var i = 0; i < 8; i++)
-                sheet.properties.SetVector(
-                    _fillKeyIDs[i],
-                    KeyToVector(colorKeys[Mathf.Min(i, colorKeys.Length - 1)])
-                );
+            GradientUtility.SetColorKeys(sheet, _gradientCache);
 
             var pass = (int)settings.edgeSource.value;
-            if (settings.fillOpacity > 0 && colorKeys.Length > 3) pass += 3;
+            if (settings.fillOpacity > 0 && _gradientCache.Length > 3) pass += 3;
             if (settings.fillGradient.value.mode == GradientMode.Blend) pass += 6;
             cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, pass);
 

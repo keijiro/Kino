@@ -11,14 +11,14 @@ half4 _EdgeColor;
 half2 _EdgeThresholds;
 half _FillOpacity;
 
-half4 _FillKey0;
-half4 _FillKey1;
-half4 _FillKey2;
-half4 _FillKey3;
-half4 _FillKey4;
-half4 _FillKey5;
-half4 _FillKey6;
-half4 _FillKey7;
+half4 _ColorKey0;
+half4 _ColorKey1;
+half4 _ColorKey2;
+half4 _ColorKey3;
+half4 _ColorKey4;
+half4 _ColorKey5;
+half4 _ColorKey6;
+half4 _ColorKey7;
 
 half4 Frag(VaryingsDefault i) : SV_Target
 {
@@ -76,27 +76,27 @@ half4 Frag(VaryingsDefault i) : SV_Target
 #endif
 
     // Apply fill gradient.
-    half3 fill = _FillKey0.rgb;
+    half3 fill = _ColorKey0.rgb;
     half lum = Luminance(LinearToSRGB(c0.rgb));
 #ifdef RECOLOR_GRADIENT_LERP
-    fill = lerp(fill, _FillKey1.rgb, saturate((lum - _FillKey0.w) / (_FillKey1.w - _FillKey0.w)));
-    fill = lerp(fill, _FillKey2.rgb, saturate((lum - _FillKey1.w) / (_FillKey2.w - _FillKey1.w)));
-    fill = lerp(fill, _FillKey3.rgb, saturate((lum - _FillKey2.w) / (_FillKey3.w - _FillKey2.w)));
+    fill = lerp(fill, _ColorKey1.rgb, saturate((lum - _ColorKey0.w) / (_ColorKey1.w - _ColorKey0.w)));
+    fill = lerp(fill, _ColorKey2.rgb, saturate((lum - _ColorKey1.w) / (_ColorKey2.w - _ColorKey1.w)));
+    fill = lerp(fill, _ColorKey3.rgb, saturate((lum - _ColorKey2.w) / (_ColorKey3.w - _ColorKey2.w)));
     #ifdef RECOLOR_GRADIENT_EXT
-    fill = lerp(fill, _FillKey4.rgb, saturate((lum - _FillKey3.w) / (_FillKey4.w - _FillKey3.w)));
-    fill = lerp(fill, _FillKey5.rgb, saturate((lum - _FillKey4.w) / (_FillKey5.w - _FillKey4.w)));
-    fill = lerp(fill, _FillKey6.rgb, saturate((lum - _FillKey5.w) / (_FillKey6.w - _FillKey5.w)));
-    fill = lerp(fill, _FillKey7.rgb, saturate((lum - _FillKey6.w) / (_FillKey7.w - _FillKey6.w)));
+    fill = lerp(fill, _ColorKey4.rgb, saturate((lum - _ColorKey3.w) / (_ColorKey4.w - _ColorKey3.w)));
+    fill = lerp(fill, _ColorKey5.rgb, saturate((lum - _ColorKey4.w) / (_ColorKey5.w - _ColorKey4.w)));
+    fill = lerp(fill, _ColorKey6.rgb, saturate((lum - _ColorKey5.w) / (_ColorKey6.w - _ColorKey5.w)));
+    fill = lerp(fill, _ColorKey7.rgb, saturate((lum - _ColorKey6.w) / (_ColorKey7.w - _ColorKey6.w)));
     #endif
 #else
-    fill = lum > _FillKey0.w ? _FillKey1.rgb : fill;
-    fill = lum > _FillKey1.w ? _FillKey2.rgb : fill;
-    fill = lum > _FillKey2.w ? _FillKey3.rgb : fill;
+    fill = lum > _ColorKey0.w ? _ColorKey1.rgb : fill;
+    fill = lum > _ColorKey1.w ? _ColorKey2.rgb : fill;
+    fill = lum > _ColorKey2.w ? _ColorKey3.rgb : fill;
     #ifdef RECOLOR_GRADIENT_EXT
-    fill = lum > _FillKey3.w ? _FillKey4.rgb : fill;
-    fill = lum > _FillKey4.w ? _FillKey5.rgb : fill;
-    fill = lum > _FillKey5.w ? _FillKey6.rgb : fill;
-    fill = lum > _FillKey6.w ? _FillKey7.rgb : fill;
+    fill = lum > _ColorKey3.w ? _ColorKey4.rgb : fill;
+    fill = lum > _ColorKey4.w ? _ColorKey5.rgb : fill;
+    fill = lum > _ColorKey5.w ? _ColorKey6.rgb : fill;
+    fill = lum > _ColorKey6.w ? _ColorKey7.rgb : fill;
     #endif
 #endif
 
