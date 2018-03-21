@@ -1,4 +1,5 @@
 #include "PostProcessing/Shaders/StdLib.hlsl"
+#include "PostProcessing/Shaders/Colors.hlsl"
 
 TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
 TEXTURE2D_SAMPLER2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2);
@@ -6,9 +7,18 @@ TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
 
 float4 _MainTex_TexelSize;
 
-half4 _LineColor;
-half4 _BackgroundColor;
-half2 _Thresholds;
+half4 _EdgeColor;
+half2 _EdgeThresholds;
+half _FillOpacity;
+
+half4 _FillKey0;
+half4 _FillKey1;
+half4 _FillKey2;
+half4 _FillKey3;
+half4 _FillKey4;
+half4 _FillKey5;
+half4 _FillKey6;
+half4 _FillKey7;
 
 half4 Frag(VaryingsDefault i) : SV_Target
 {
@@ -23,7 +33,7 @@ half4 Frag(VaryingsDefault i) : SV_Target
     float2 uv2 = uv + float2(_MainTex_TexelSize.x, 0); // TR
     float2 uv3 = uv + float2(0, _MainTex_TexelSize.y); // BL
 
-#ifdef CONTOUR_COLOR
+#ifdef RECOLOR_EDGE_COLOR
 
     // Color samples
     half3 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv1).rgb;
@@ -37,7 +47,7 @@ half4 Frag(VaryingsDefault i) : SV_Target
 
 #endif
 
-#ifdef CONTOUR_DEPTH
+#ifdef RECOLOR_EDGE_DEPTH
 
     // Depth samples
     float d0 = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, uv0, 0);
@@ -50,7 +60,7 @@ half4 Frag(VaryingsDefault i) : SV_Target
 
 #endif
 
-#ifdef CONTOUR_NORMAL
+#ifdef RECOLOR_EDGE_NORMAL
 
     // Normal samples
     half3 n0 = SAMPLE_TEXTURE2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2, uv0).rgb;
@@ -65,8 +75,33 @@ half4 Frag(VaryingsDefault i) : SV_Target
 
 #endif
 
-    half edge = smoothstep(_Thresholds.x, _Thresholds.y, g);
-    half3 cb = lerp(c0.rgb, _BackgroundColor.rgb, _BackgroundColor.a);
-    half3 co = lerp(cb, _LineColor.rgb, edge * _LineColor.a);
+    // Apply fill gradient.
+    half3 fill = _FillKey0.rgb;
+    half lum = Luminance(LinearToSRGB(c0.rgb));
+#ifdef RECOLOR_GRADIENT_LERP
+    fill = lerp(fill, _FillKey1.rgb, saturate((lum - _FillKey0.w) / (_FillKey1.w - _FillKey0.w)));
+    fill = lerp(fill, _FillKey2.rgb, saturate((lum - _FillKey1.w) / (_FillKey2.w - _FillKey1.w)));
+    fill = lerp(fill, _FillKey3.rgb, saturate((lum - _FillKey2.w) / (_FillKey3.w - _FillKey2.w)));
+    #ifdef RECOLOR_GRADIENT_EXT
+    fill = lerp(fill, _FillKey4.rgb, saturate((lum - _FillKey3.w) / (_FillKey4.w - _FillKey3.w)));
+    fill = lerp(fill, _FillKey5.rgb, saturate((lum - _FillKey4.w) / (_FillKey5.w - _FillKey4.w)));
+    fill = lerp(fill, _FillKey6.rgb, saturate((lum - _FillKey5.w) / (_FillKey6.w - _FillKey5.w)));
+    fill = lerp(fill, _FillKey7.rgb, saturate((lum - _FillKey6.w) / (_FillKey7.w - _FillKey6.w)));
+    #endif
+#else
+    fill = lum > _FillKey0.w ? _FillKey1.rgb : fill;
+    fill = lum > _FillKey1.w ? _FillKey2.rgb : fill;
+    fill = lum > _FillKey2.w ? _FillKey3.rgb : fill;
+    #ifdef RECOLOR_GRADIENT_EXT
+    fill = lum > _FillKey3.w ? _FillKey4.rgb : fill;
+    fill = lum > _FillKey4.w ? _FillKey5.rgb : fill;
+    fill = lum > _FillKey5.w ? _FillKey6.rgb : fill;
+    fill = lum > _FillKey6.w ? _FillKey7.rgb : fill;
+    #endif
+#endif
+
+    half edge = smoothstep(_EdgeThresholds.x, _EdgeThresholds.y, g);
+    half3 cb = lerp(c0.rgb, fill, _FillOpacity);
+    half3 co = lerp(cb, _EdgeColor.rgb, edge * _EdgeColor.a);
     return half4(co, c0.a);
 }

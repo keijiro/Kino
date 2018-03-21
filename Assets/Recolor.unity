@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 1, g: 0.040268946, b: 0, a: 1}
+  m_AmbientSkyColor: {r: 1, g: 1, b: 1, a: 1}
   m_AmbientEquatorColor: {r: 0, g: 0, b: 0, a: 1}
   m_AmbientGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_AmbientIntensity: 1
@@ -436,7 +436,7 @@ MonoBehaviour:
   m_BeforeStackBundles:
   - assemblyQualifiedName: Kino.PostProcessing.Streak, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  - assemblyQualifiedName: Kino.PostProcessing.Contour, Assembly-CSharp, Version=0.0.0.0,
+  - assemblyQualifiedName: Kino.PostProcessing.Recolor, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
   m_AfterStackBundles: []
 --- !u!20 &2068039052
@@ -448,7 +448,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.26415092, g: 0.26415092, b: 0.26415092, a: 0}
+  m_BackGroundColor: {r: 1, g: 1, b: 1, a: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
