@@ -28,6 +28,9 @@ MonoBehaviour:
   enabled:
     overrideState: 1
     value: 1
+  mode:
+    overrideState: 1
+    value: 0
   lineColor:
     overrideState: 1
     value: {r: 0, g: 0, b: 0, a: 1}
@@ -36,7 +39,7 @@ MonoBehaviour:
     value: {r: 0.58431375, g: 0.15686275, b: 0.15686275, a: 1}
   threshold:
     overrideState: 1
-    value: 0.265
+    value: 0.407
   contrast:
     overrideState: 1
-    value: 0.655
+    value: 0.628
