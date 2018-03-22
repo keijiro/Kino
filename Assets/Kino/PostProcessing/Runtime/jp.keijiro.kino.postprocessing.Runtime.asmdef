@@ -1,0 +1,10 @@
+{
+    "name": "Kino.PostProcessing",
+    "references": [
+        "com.unity.postprocessing.Runtime"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
