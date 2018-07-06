@@ -9,8 +9,7 @@ namespace Kino.PostProcessing
     [PostProcess(typeof(OverlayRenderer), PostProcessEvent.AfterStack, "Kino/Overlay")]
     public sealed class Overlay : PostProcessEffectSettings
     {
-        public GradientParameter gradient =
-            new GradientParameter{ value = GradientUtility.DefaultGradient };
+        public GradientParameter gradient = new GradientParameter();
 
         [Range(0, 1)] public FloatParameter opacity = new FloatParameter { value = 0 };
 
