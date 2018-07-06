@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "com.unity.ads": "exclude",
-    "com.unity.standardevents": "exclude",
-    "com.unity.analytics": "exclude",
-    "com.unity.purchasing": "exclude",
-    "com.unity.postprocessing": "2.0.2-preview"
+    "com.unity.package-manager-ui": "1.9.11",
+    "com.unity.postprocessing": "2.0.7-preview",
+    "com.unity.modules.imgui": "1.0.0",
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.vr": "1.0.0"
   }
 }
