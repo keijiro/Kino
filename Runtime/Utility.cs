@@ -4,7 +4,13 @@ using UnityEngine.Rendering.PostProcessing;
 namespace Kino.PostProcessing
 {
     [System.Serializable]
-    public sealed class GradientParameter : ParameterOverride<Gradient>{}
+    public sealed class GradientParameter : ParameterOverride<Gradient>
+    {
+        protected override void OnEnable()
+        {
+            if (value == null) value = GradientUtility.DefaultGradient;
+        }
+    }
 
     public static class GradientUtility
     {

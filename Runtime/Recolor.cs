@@ -26,8 +26,7 @@ namespace Kino.PostProcessing
 
         [Range(0, 1)] public FloatParameter edgeContrast = new FloatParameter { value = 0.5f };
 
-        public GradientParameter fillGradient =
-            new GradientParameter{ value = GradientUtility.DefaultGradient };
+        public GradientParameter fillGradient = new GradientParameter();
 
         [Range(0, 1)] public FloatParameter fillOpacity = new FloatParameter { value = 0 };
     }
