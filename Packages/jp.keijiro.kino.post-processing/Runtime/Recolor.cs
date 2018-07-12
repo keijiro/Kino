@@ -3,21 +3,17 @@ using UnityEngine.Rendering.PostProcessing;
 
 namespace Kino.PostProcessing
 {
-    #region Local types
-
-    public enum EdgeSource { Color, Depth, Normal }
-
-    [System.Serializable]
-    public sealed class EdgeSourceParameter : ParameterOverride<EdgeSource> {}
-
-    #endregion
-
     #region Effect settings
 
     [System.Serializable]
     [PostProcess(typeof(RecolorRenderer), PostProcessEvent.BeforeStack, "Kino/Recolor")]
     public sealed class Recolor : PostProcessEffectSettings
     {
+        public enum EdgeSource { Color, Depth, Normal }
+
+        [System.Serializable]
+        public sealed class EdgeSourceParameter : ParameterOverride<EdgeSource> {}
+
         public ColorParameter edgeColor = new ColorParameter { value = new Color(0, 0, 0, 0) };
 
         public EdgeSourceParameter edgeSource = new EdgeSourceParameter { value = EdgeSource.Depth };
@@ -48,7 +44,7 @@ namespace Kino.PostProcessing
 
         Vector2 EdgeThresholdVector {
             get {
-                if (settings.edgeSource == EdgeSource.Depth)
+                if (settings.edgeSource == Recolor.EdgeSource.Depth)
                 {
                     var thresh = 1 / Mathf.Lerp(1000, 1, settings.edgeThreshold);
                     var scaler = 1 + 2 / (1.01f - settings.edgeContrast);
@@ -72,7 +68,7 @@ namespace Kino.PostProcessing
 
         public override DepthTextureMode GetCameraFlags()
         {
-            return settings.edgeSource == EdgeSource.Depth ?
+            return settings.edgeSource == Recolor.EdgeSource.Depth ?
                 DepthTextureMode.Depth : DepthTextureMode.None;
         }
 
