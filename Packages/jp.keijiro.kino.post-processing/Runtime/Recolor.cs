@@ -70,6 +70,12 @@ namespace Kino.PostProcessing
         #endif
         }
 
+        public override DepthTextureMode GetCameraFlags()
+        {
+            return settings.edgeSource == EdgeSource.Depth ?
+                DepthTextureMode.Depth : DepthTextureMode.None;
+        }
+
         public override void Render(PostProcessRenderContext context)
         {
         #if UNITY_EDITOR
