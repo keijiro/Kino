@@ -14,7 +14,7 @@ System Requirements
 Effects
 -------
 
-Currently Kino contains the following three effects.
+Currently Kino contains the following effects.
 
 ### Streak
 
@@ -39,6 +39,13 @@ to add contour lines to the images.
 **Overlay** simply adds a color gradient to the final output of the post
 process. It's handy to widen the color spectrum of the output in a nearly
 subliminal level.
+
+### Isoline
+
+![gif](https://i.imgur.com/yiiADOT.gif)
+
+**Isoline** draws contour lines along a given axis. This is useful for creating
+a "laser scan" effect.
 
 How To Use
 ----------
