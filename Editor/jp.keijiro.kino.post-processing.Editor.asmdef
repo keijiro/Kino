@@ -2,8 +2,8 @@
     "name": "jp.keijiro.kino.post-processing.Editor",
     "references": [
         "jp.keijiro.kino.post-processing.Runtime",
-        "com.unity.postprocessing.Editor",
-        "com.unity.postprocessing.Runtime"
+        "Unity.Postprocessing.Editor",
+        "Unity.Postprocessing.Runtime"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [

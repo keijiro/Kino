@@ -1,7 +1,7 @@
 {
     "name": "jp.keijiro.kino.post-processing.Runtime",
     "references": [
-        "com.unity.postprocessing.Runtime"
+        "Unity.Postprocessing.Runtime"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
