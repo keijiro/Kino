@@ -1,7 +1,7 @@
 {
-    "name": "jp.keijiro.kino.post-processing.Editor",
+    "name": "Kino.Postprocessing.Editor",
     "references": [
-        "jp.keijiro.kino.post-processing.Runtime",
+        "Kino.Postprocessing",
         "Unity.Postprocessing.Editor",
         "Unity.Postprocessing.Runtime"
     ],
