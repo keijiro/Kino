@@ -9,7 +9,7 @@ namespace Kino.PostProcessing
     [PostProcess(typeof(SharpenRenderer), PostProcessEvent.AfterStack, "Kino/Sharpen")]
     public sealed class Sharpen : PostProcessEffectSettings
     {
-        [Range(0, 1)] public FloatParameter strength = new FloatParameter { value = 0.5f };
+        [Range(0, 1)] public FloatParameter strength = new FloatParameter();
     }
 
     #endregion
