@@ -22,7 +22,7 @@ namespace Kino.PostProcessing
         #region Common parameters
 
         public SourceParameter source = new SourceParameter { value = Source.Gradient };
-        public BlendModeParameter blendMode = new BlendModeParameter { value = BlendMode.Screen };
+        public BlendModeParameter blendMode = new BlendModeParameter { value = BlendMode.Overlay };
         [Range(0, 1)] public FloatParameter opacity = new FloatParameter { value = 0 };
 
         #endregion
