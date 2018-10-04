@@ -4,6 +4,42 @@
     {
         Cull Off ZWrite Off ZTest Always
 
+        // Normal mode (alpha blending)
+
+        Pass // Texture
+        {
+            HLSLPROGRAM
+            #pragma vertex VertDefault
+            #pragma fragment FragTexture
+            #pragma multi_compile _ UNITY_COLORSPACE_GAMMA
+            #define OVERLAY_BLEND_NORMAL
+            #include "Overlay.hlsl"
+            ENDHLSL
+        }
+
+        Pass // 3 keys gradient
+        {
+            HLSLPROGRAM
+            #pragma vertex VertDefault
+            #pragma fragment FragGradient
+            #pragma multi_compile _ UNITY_COLORSPACE_GAMMA
+            #define OVERLAY_BLEND_NORMAL
+            #include "Overlay.hlsl"
+            ENDHLSL
+        }
+
+        Pass // 8 keys gradient
+        {
+            HLSLPROGRAM
+            #pragma vertex VertDefault
+            #pragma fragment FragGradient
+            #pragma multi_compile _ UNITY_COLORSPACE_GAMMA
+            #define OVERLAY_GRADIENT_EXT
+            #define OVERLAY_BLEND_NORMAL
+            #include "Overlay.hlsl"
+            ENDHLSL
+        }
+
         // Screen mode
 
         Pass // Texture

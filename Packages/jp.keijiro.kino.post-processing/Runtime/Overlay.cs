@@ -12,7 +12,7 @@ namespace Kino.PostProcessing
         #region Nested types
 
         public enum Source { Color, Gradient, Texture }
-        public enum BlendMode { Screen, Overlay, Multiply, SoftLight, HardLight }
+        public enum BlendMode { Normal, Screen, Overlay, Multiply, SoftLight, HardLight }
 
         [System.Serializable] public sealed class SourceParameter : ParameterOverride<Source> {}
         [System.Serializable] public sealed class BlendModeParameter : ParameterOverride<BlendMode> {}

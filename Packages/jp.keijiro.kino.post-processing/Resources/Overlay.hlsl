@@ -13,7 +13,11 @@ half4 BlendFunction(half4 c1, half4 c2)
 {
     half4 c;
 
-#if defined(OVERLAY_BLEND_MULTIPLY)
+#if defined(OVERLAY_BLEND_NORMAL)
+
+    c = c2;
+
+#elif defined(OVERLAY_BLEND_MULTIPLY)
 
     c = c1 * c2;
 
