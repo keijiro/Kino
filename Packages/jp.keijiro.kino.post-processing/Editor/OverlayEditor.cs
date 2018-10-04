@@ -5,8 +5,7 @@ using UnityEditor.Rendering.PostProcessing;
 
 namespace Kino.PostProcessing
 {
-    [PostProcessEditor(typeof(Overlay))]
-    public sealed class OverlayEditor : PostProcessEffectEditor<Overlay>
+    class OverlayEditorBase<T> : PostProcessEffectEditor<T> where T : OverlayBase
     {
         SerializedParameterOverride _source;
         SerializedParameterOverride _blendMode;
@@ -60,4 +59,10 @@ namespace Kino.PostProcessing
             PropertyField(_opacity);
         }
     }
+
+    [PostProcessEditor(typeof(Overlay))]
+    sealed class OverlayEditor : OverlayEditorBase<Overlay> {}
+
+    [PostProcessEditor(typeof(PreStackOverlay))]
+    sealed class PreStackOverlayEditor : OverlayEditorBase<PreStackOverlay> {}
 }
