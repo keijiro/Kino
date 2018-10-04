@@ -1,5 +1,5 @@
 {
-    "name": "jp.keijiro.kino.post-processing.Runtime",
+    "name": "Kino.Postprocessing",
     "references": [
         "Unity.Postprocessing.Runtime"
     ],
