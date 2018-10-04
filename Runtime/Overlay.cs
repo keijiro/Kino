@@ -5,9 +5,8 @@ namespace Kino.PostProcessing
 {
     #region Effect settings
 
-    [System.Serializable]
-    [PostProcess(typeof(OverlayRenderer), PostProcessEvent.AfterStack, "Kino/Overlay")]
-    public sealed class Overlay : PostProcessEffectSettings
+    // Base implementation (shared with PreStackOverlay)
+    public class OverlayBase : PostProcessEffectSettings
     {
         #region Nested types
 
@@ -48,11 +47,17 @@ namespace Kino.PostProcessing
         #endregion
     }
 
+    // Specialization for the post-stack overlay effect
+    [System.Serializable]
+    [PostProcess(typeof(OverlayRenderer), PostProcessEvent.AfterStack, "Kino/Overlay")]
+    public sealed class Overlay : OverlayBase {}
+
     #endregion
 
     #region Effect renderer
 
-    sealed class OverlayRenderer : PostProcessEffectRenderer<Overlay>
+    // Base implementation (shared with PreStackOverlayRenderer)
+    public class OverlayRendererBase<T> : PostProcessEffectRenderer<T> where T : OverlayBase
     {
         static class ShaderIDs
         {
@@ -128,6 +133,9 @@ namespace Kino.PostProcessing
             cmd.EndSample("Overlay");
         }
     }
+
+    // Specialization for the post-stack overlay effect
+    public sealed class OverlayRenderer : OverlayRendererBase<Overlay> {}
 
     #endregion
 }
