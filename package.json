@@ -4,5 +4,5 @@
     "version": "0.1.0",
     "unity": "2018.3",
     "description": "Kino is a collection of custom effects for the Post Processing Stack.",
-    "dependencies": { "com.unity.postprocessing": "2.0.13-preview" }
+    "dependencies": { "com.unity.postprocessing": "2.0.15-preview" }
 }

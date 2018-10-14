@@ -2,8 +2,8 @@ Shader "Hidden/Kino/PostProcessing/Invert"
 {
     HLSLINCLUDE
 
-    #include "PostProcessing/Shaders/StdLib.hlsl"
-    #include "PostProcessing/Shaders/Colors.hlsl"
+    #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+    #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
 
     TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
     half _Strength;
