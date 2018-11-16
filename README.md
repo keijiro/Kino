@@ -8,7 +8,7 @@ Kino
 System Requirements
 -------------------
 
-- Unity 2018.1 or later
+- Unity 2018.3 or later
 - Post Processing Stack v2
 
 Effects
