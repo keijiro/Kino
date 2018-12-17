@@ -50,31 +50,29 @@ a "laser scan" effect.
 How To Use
 ----------
 
-### Trying the demo project
+### Trying out the examples
 
-If you know how to deal with [Git submodules], clone this repository and
-do `subdmoule init` and `submodule update` in the repository. You can also
-use the `--recursive` option to automatically init & update submodules when
-cloning.
+The example project contained in this repository uses [Git support on Package
+Manager] that was newly added in Unity 2018.3. To enable this feature, Git
+must be installed on the system. More specifically, you have to install [Git
+for Windows] when using a Windows system, or Xcode for a Mac system.
 
-In case you don't prefer using Git submodules, download the project from the
-[project zip file] link. Then download and extract the following packages into
-the `Packages` directory in the project.
-
-- [jp.keijiro.danish-statues](https://github.com/keijiro/DanishStatues/archive/upm.zip)
-- [jp.keijiro.test-assets](https://github.com/keijiro/jp.keijiro.test-assets/archive/master.zip)
-
-[Git submodules]: https://git-scm.com/book/en/v2/Git-Tools-Submodules
-[project zip file]: https://github.com/keijiro/Kino/archive/master.zip
+[Git support on Package Manager]:
+    https://forum.unity.com/threads/git-support-on-package-manager.573673/
+[Git for Windows]: https://git-scm.com/downloads
 
 ### Using in your projects
 
 Download and extract the [package zip file]. Move the extracted directory
 (`Kino-upm`) into the `Packages` directory in your project.
 
-If you're using Git to manage your project, adding the `upm` branch of this
-repository as a submodule in the `Packages` directory is also a handy way to
-integrate it.
+You can also use [Git support on Package Manager] to import the package. Add
+the following line to the `dependencies` section in the package manifest file
+(`Packages/manifest.json`).
+
+```
+"jp.keijiro.kino.post-processing": "https://github.com/keijiro/jp.kino.post-processing.git#upm"
+```
 
 [package zip file]: https://github.com/keijiro/Kino/archive/upm.zip
 

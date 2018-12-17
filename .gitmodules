@@ -1,7 +1,0 @@
-[submodule "Packages/jp.keijiro.test-assets"]
-	path = Packages/jp.keijiro.test-assets
-	url = git@github.com:keijiro/jp.keijiro.test-assets.git
-[submodule "Packages/jp.keijiro.danish-statues"]
-	path = Packages/jp.keijiro.danish-statues
-	url = git@github.com:keijiro/DanishStatues.git
-	branch = upm
