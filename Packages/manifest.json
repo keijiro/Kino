@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "com.unity.package-manager-ui": "2.0.3",
+    "jp.keijiro.danish-statues": "https://github.com/keijiro/DanishStatues.git#upm",
+    "jp.keijiro.test-assets": "https://github.com/keijiro/jp.keijiro.test-assets.git",
     "com.unity.modules.imgui": "1.0.0",
     "com.unity.modules.jsonserialize": "1.0.0",
     "com.unity.modules.physics": "1.0.0",
@@ -8,5 +10,15 @@
     "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
+  },
+  "lock": {
+    "jp.keijiro.danish-statues": {
+      "hash": "de6f1eac24342e8fac2ab7d4d19e0755cbfa8ebe",
+      "revision": "upm"
+    },
+    "jp.keijiro.test-assets": {
+      "hash": "01619e6a98ff383b7cb2ea27e6a0d39702c7c8f3",
+      "revision": "HEAD"
+    }
   }
 }
