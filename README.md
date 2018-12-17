@@ -53,7 +53,7 @@ How To Use
 ### Trying out the examples
 
 The example project contained in this repository uses [Git support on Package
-Manager] that was newly added from Unity 2018.3. To enable this feature, Git
+Manager] that was newly added in Unity 2018.3. To enable this feature, Git
 must be installed on the system. More specifically, you have to install [Git
 for Windows] when using a Windows system, or Xcode for a Mac system.
 
@@ -71,7 +71,7 @@ the following line to the `dependencies` section in the package manifest file
 (`Packages/manifest.json`).
 
 ```
-"jp.keijiro.kino.post-processing": "https://github.com/keijiro/jp.kino.post-processing.git#upm",
+"jp.keijiro.kino.post-processing": "https://github.com/keijiro/jp.kino.post-processing.git#upm"
 ```
 
 [package zip file]: https://github.com/keijiro/Kino/archive/upm.zip
