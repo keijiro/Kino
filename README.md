@@ -71,7 +71,7 @@ the following line to the `dependencies` section in the package manifest file
 (`Packages/manifest.json`).
 
 ```
-"jp.keijiro.kino.post-processing": "https://github.com/keijiro/jp.kino.post-processing.git#upm"
+"jp.keijiro.kino.post-processing": "https://github.com/keijiro/kino.git#upm"
 ```
 
 [package zip file]: https://github.com/keijiro/Kino/archive/upm.zip
