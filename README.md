@@ -1,20 +1,20 @@
 Kino
 ====
 
-**Kino** is a collection of custom effects for Unity's [Post Processing Stack].
+**Kino** is a collection of custom post-processing effects for Unity's
+[High Definition Render Pipeline][HDRP] (HDRP).
 
-[Post Processing Stack]: https://github.com/Unity-Technologies/PostProcessing
+[HDRP]:
+    https://docs.unity3d.com/Packages/com.unity.render-pipelines.high-definition@latest
 
 System Requirements
 -------------------
 
-- Unity 2018.3 or later
-- Post Processing Stack v2
+- Unity 2019.3
+- HDRP 7.1
 
 Effects
 -------
-
-Currently Kino contains the following effects.
 
 ### Streak
 
@@ -40,43 +40,56 @@ to add contour lines to the images.
 process. It's handy to widen the color spectrum of the output in a nearly
 subliminal level.
 
-### Isoline
+### Sharpen
 
-![gif](https://i.imgur.com/yiiADOT.gif)
+A simple sharpen filter that is similar to ones used in paint software.
 
-**Isoline** draws contour lines along a given axis. This is useful for creating
-a "laser scan" effect.
+### Invert
 
-How To Use
-----------
+A simple color inversion filter.
 
-### Trying out the examples
+How To Install
+--------------
 
-The example project contained in this repository uses [Git support on Package
-Manager] that was newly added in Unity 2018.3. To enable this feature, Git
-must be installed on the system. More specifically, you have to install [Git
-for Windows] when using a Windows system, or Xcode for a Mac system.
-
-[Git support on Package Manager]:
-    https://forum.unity.com/threads/git-support-on-package-manager.573673/
-[Git for Windows]: https://git-scm.com/downloads
-
-### Using in your projects
-
-Download and extract the [package zip file]. Move the extracted directory
-(`Kino-upm`) into the `Packages` directory in your project.
-
-You can also use [Git support on Package Manager] to import the package. Add
-the following line to the `dependencies` section in the package manifest file
+The Kino package uses the [scoped registry] feature to import dependent
+packages. Please add the following sections to the package manifest file
 (`Packages/manifest.json`).
 
+To the `scopedRegistries` section:
+
 ```
-"jp.keijiro.kino.post-processing": "https://github.com/keijiro/kino.git#upm"
+{
+  "name": "Keijiro",
+  "url": "https://registry.npmjs.com",
+  "scopes": [ "jp.keijiro" ]
+}
 ```
 
-[package zip file]: https://github.com/keijiro/Kino/archive/upm.zip
+To the `dependencies` section:
+
+```
+"jp.keijiro.kino.post-processing": "2.0.0"
+```
+
+After changes, the manifest file should look like below:
+
+```
+{
+  "scopedRegistries": [
+    {
+      "name": "Keijiro",
+      "url": "https://registry.npmjs.com",
+      "scopes": [ "jp.keijiro" ]
+    }
+  ],
+  "dependencies": {
+    "jp.keijiro.kino.post-processing": "2.0.0",
+    ...
+```
+
+[scoped registry]: https://docs.unity3d.com/Manual/upm-scoped.html
 
 License
 -------
 
-[MIT](Packages/jp.keijiro.kino.postprocessing/LICENSE.md)
+[Unlicense](https://unlicense.org/)
