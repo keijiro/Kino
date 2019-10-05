@@ -1,72 +1,103 @@
-#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/NormalBuffer.hlsl"
 
-TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-TEXTURE2D_SAMPLER2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2);
-TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
-
-float4 _MainTex_TexelSize;
-
-half4 _EdgeColor;
-half2 _EdgeThresholds;
-half _FillOpacity;
-
-half4 _ColorKey0;
-half4 _ColorKey1;
-half4 _ColorKey2;
-half4 _ColorKey3;
-half4 _ColorKey4;
-half4 _ColorKey5;
-half4 _ColorKey6;
-half4 _ColorKey7;
-
-half4 Frag(VaryingsDefault i) : SV_Target
+struct Attributes
 {
-    float2 uv = i.texcoord;
+    uint vertexID : SV_VertexID;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
+
+struct Varyings
+{
+    float4 positionCS : SV_POSITION;
+    float2 texcoord   : TEXCOORD0;
+    UNITY_VERTEX_OUTPUT_STEREO
+};
+
+Varyings Vertex(Attributes input)
+{
+    Varyings output;
+    UNITY_SETUP_INSTANCE_ID(input);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+    output.positionCS = GetFullScreenTriangleVertexPosition(input.vertexID);
+    output.texcoord = GetFullScreenTriangleTexCoord(input.vertexID);
+    return output;
+}
+
+TEXTURE2D_X(_InputTexture);
+
+float4 _EdgeColor;
+float2 _EdgeThresholds;
+float _FillOpacity;
+
+float4 _ColorKey0;
+float4 _ColorKey1;
+float4 _ColorKey2;
+float4 _ColorKey3;
+float4 _ColorKey4;
+float4 _ColorKey5;
+float4 _ColorKey6;
+float4 _ColorKey7;
+
+float3 LoadWorldNormal(uint2 positionSS)
+{
+    NormalData data;
+    DecodeFromNormalBuffer(positionSS, data);
+    return data.normalWS;
+}
+
+float4 Fragment(Varyings input) : SV_Target
+{
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+    uint2 positionSS = input.texcoord * _ScreenSize.xy;
 
     // Source color
-    half4 c0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+    float4 c0 = LOAD_TEXTURE2D_X(_InputTexture, positionSS);
 
     // Four sample points of the roberts cross operator
-    float2 uv0 = uv;                                   // TL
-    float2 uv1 = uv + _MainTex_TexelSize.xy;           // BR
-    float2 uv2 = uv + float2(_MainTex_TexelSize.x, 0); // TR
-    float2 uv3 = uv + float2(0, _MainTex_TexelSize.y); // BL
+    // TL / BR / TR / BL
+    uint2 uv0 = positionSS;
+    uint2 uv1 = min(positionSS + uint2(1, 1), _ScreenSize.xy - 1);
+    uint2 uv2 = uint2(uv1.x, uv0.y);
+    uint2 uv3 = uint2(uv0.x, uv1.y);
 
 #ifdef RECOLOR_EDGE_COLOR
 
     // Color samples
-    half3 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv1).rgb;
-    half3 c2 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv2).rgb;
-    half3 c3 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv3).rgb;
+    float3 c1 = LOAD_TEXTURE2D_X(_InputTexture, uv1).rgb;
+    float3 c2 = LOAD_TEXTURE2D_X(_InputTexture, uv2).rgb;
+    float3 c3 = LOAD_TEXTURE2D_X(_InputTexture, uv3).rgb;
 
     // Roberts cross operator
-    half3 g1 = c1 - c0.rgb;
-    half3 g2 = c3 - c2;
-    half g = sqrt(dot(g1, g1) + dot(g2, g2)) * 10;
+    float3 g1 = c1 - c0.rgb;
+    float3 g2 = c3 - c2;
+    float g = sqrt(dot(g1, g1) + dot(g2, g2)) * 10;
 
 #endif
 
 #ifdef RECOLOR_EDGE_DEPTH
 
     // Depth samples
-    float d0 = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, uv0, 0);
-    float d1 = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, uv1, 0);
-    float d2 = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, uv2, 0);
-    float d3 = SAMPLE_DEPTH_TEXTURE_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, uv3, 0);
+    float d0 = LoadCameraDepth(uv0);
+    float d1 = LoadCameraDepth(uv1);
+    float d2 = LoadCameraDepth(uv2);
+    float d3 = LoadCameraDepth(uv3);
 
     // Roberts cross operator
-    half g = length(float2(d1 - d0, d3 - d2)) * 100;
+    float g = length(float2(d1 - d0, d3 - d2)) * 100;
 
 #endif
 
 #ifdef RECOLOR_EDGE_NORMAL
 
     // Normal samples
-    half3 n0 = SAMPLE_TEXTURE2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2, uv0).rgb;
-    half3 n1 = SAMPLE_TEXTURE2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2, uv1).rgb;
-    half3 n2 = SAMPLE_TEXTURE2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2, uv2).rgb;
-    half3 n3 = SAMPLE_TEXTURE2D(_CameraGBufferTexture2, sampler_CameraGBufferTexture2, uv3).rgb;
+    float3 n0 = LoadWorldNormal(uv0);
+    float3 n1 = LoadWorldNormal(uv1);
+    float3 n2 = LoadWorldNormal(uv2);
+    float3 n3 = LoadWorldNormal(uv3);
 
     // Roberts cross operator
     float3 g1 = n1 - n0;
@@ -76,8 +107,8 @@ half4 Frag(VaryingsDefault i) : SV_Target
 #endif
 
     // Apply fill gradient.
-    half3 fill = _ColorKey0.rgb;
-    half lum = Luminance(LinearToSRGB(c0.rgb));
+    float3 fill = _ColorKey0.rgb;
+    float lum = Luminance(LinearToSRGB(c0.rgb));
 #ifdef RECOLOR_GRADIENT_LERP
     fill = lerp(fill, _ColorKey1.rgb, saturate((lum - _ColorKey0.w) / (_ColorKey1.w - _ColorKey0.w)));
     fill = lerp(fill, _ColorKey2.rgb, saturate((lum - _ColorKey1.w) / (_ColorKey2.w - _ColorKey1.w)));
@@ -100,8 +131,8 @@ half4 Frag(VaryingsDefault i) : SV_Target
     #endif
 #endif
 
-    half edge = smoothstep(_EdgeThresholds.x, _EdgeThresholds.y, g);
-    half3 cb = lerp(c0.rgb, fill, _FillOpacity);
-    half3 co = lerp(cb, _EdgeColor.rgb, edge * _EdgeColor.a);
-    return half4(co, c0.a);
+    float edge = smoothstep(_EdgeThresholds.x, _EdgeThresholds.y, g);
+    float3 cb = lerp(c0.rgb, fill, _FillOpacity);
+    float3 co = lerp(cb, _EdgeColor.rgb, edge * _EdgeColor.a);
+    return float4(co, c0.a);
 }

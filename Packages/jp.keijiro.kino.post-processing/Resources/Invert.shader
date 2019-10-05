@@ -1,26 +1,47 @@
-Shader "Hidden/Kino/PostProcessing/Invert"
+﻿Shader "Hidden/Kino/PostProcess/Invert"
 {
     HLSLINCLUDE
 
-    #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-    #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
+    #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+    #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+    #include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 
-    TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-    half _Strength;
-
-    half4 Frag(VaryingsDefault i) : SV_Target
+    struct Attributes
     {
-        half4 c = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+        uint vertexID : SV_VertexID;
+        UNITY_VERTEX_INPUT_INSTANCE_ID
+    };
 
-    #ifndef UNITY_COLORSPACE_GAMMA
+    struct Varyings
+    {
+        float4 positionCS : SV_POSITION;
+        float2 texcoord   : TEXCOORD0;
+        UNITY_VERTEX_OUTPUT_STEREO
+    };
+
+    Varyings Vertex(Attributes input)
+    {
+        Varyings output;
+        UNITY_SETUP_INSTANCE_ID(input);
+        UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+        output.positionCS = GetFullScreenTriangleVertexPosition(input.vertexID);
+        output.texcoord = GetFullScreenTriangleTexCoord(input.vertexID);
+        return output;
+    }
+
+    TEXTURE2D_X(_InputTexture);
+    float _Intensity;
+
+    float4 Fragment(Varyings input) : SV_Target
+    {
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+        uint2 positionSS = input.texcoord * _ScreenSize.xy;
+        float4 c = LOAD_TEXTURE2D_X(_InputTexture, positionSS);
+
         c.rgb = LinearToSRGB(c.rgb);
-    #endif
-
-        c.rgb = lerp(c.rgb, 1 - c.rgb, _Strength);
-
-    #ifndef UNITY_COLORSPACE_GAMMA
+        c.rgb = lerp(c.rgb, 1 - c.rgb, _Intensity);
         c.rgb = SRGBToLinear(c.rgb);
-    #endif
 
         return c;
     }
@@ -29,14 +50,14 @@ Shader "Hidden/Kino/PostProcessing/Invert"
 
     SubShader
     {
-        Cull Off ZWrite Off ZTest Always
         Pass
         {
+            Cull Off ZWrite Off ZTest Always
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
-            #pragma multi_compile _ UNITY_COLORSPACE_GAMMA
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             ENDHLSL
         }
     }
+    Fallback Off
 }

@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEditor;
-using UnityEngine.Rendering.PostProcessing;
-using UnityEditor.Rendering.PostProcessing;
+using UnityEditor.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace Kino.PostProcessing
 {
-    [PostProcessEditor(typeof(Recolor))]
-    public sealed class RecolorEditor : PostProcessEffectEditor<Recolor>
+    [VolumeComponentEditor(typeof(Recolor))]
+    public sealed class RecolorEditor : VolumeComponentEditor
     {
         static class Labels
         {
@@ -18,34 +18,38 @@ namespace Kino.PostProcessing
             internal static readonly GUIContent Opacity   = new GUIContent("Opacity");
         }
 
-        SerializedParameterOverride _edgeSource;
-        SerializedParameterOverride _edgeThreshold;
-        SerializedParameterOverride _edgeContrast;
-        SerializedParameterOverride _edgeColor;
-        SerializedParameterOverride _fillGradient;
-        SerializedParameterOverride _fillOpacity;
+        SerializedDataParameter _edgeSource;
+        SerializedDataParameter _edgeThreshold;
+        SerializedDataParameter _edgeContrast;
+        SerializedDataParameter _edgeColor;
+        SerializedDataParameter _fillGradient;
+        SerializedDataParameter _fillOpacity;
 
         public override void OnEnable()
         {
-            _edgeColor     = FindParameterOverride(x => x.edgeColor);
-            _edgeSource    = FindParameterOverride(x => x.edgeSource);
-            _edgeThreshold = FindParameterOverride(x => x.edgeThreshold);
-            _edgeContrast  = FindParameterOverride(x => x.edgeContrast);
-            _fillGradient  = FindParameterOverride(x => x.fillGradient);
-            _fillOpacity   = FindParameterOverride(x => x.fillOpacity);
+            var o = new PropertyFetcher<Recolor>(serializedObject);
+
+            _edgeColor     = Unpack(o.Find(x => x.edgeColor));
+            _edgeSource    = Unpack(o.Find(x => x.edgeSource));
+            _edgeThreshold = Unpack(o.Find(x => x.edgeThreshold));
+            _edgeContrast  = Unpack(o.Find(x => x.edgeContrast));
+            _fillGradient  = Unpack(o.Find(x => x.fillGradient));
+            _fillOpacity   = Unpack(o.Find(x => x.fillOpacity));
         }
 
         public override void OnInspectorGUI()
         {
-            EditorUtilities.DrawHeaderLabel("Edge");
+            EditorGUILayout.LabelField("Edge", EditorStyles.miniLabel);
 
             PropertyField(_edgeColor, Labels.Color);
             PropertyField(_edgeSource, Labels.Source);
             PropertyField(_edgeThreshold, Labels.Threshold);
             PropertyField(_edgeContrast, Labels.Contrast);
 
-            EditorGUILayout.Space();
-            EditorUtilities.DrawHeaderLabel("Fill");
+            EditorGUILayout.LabelField("Fill", EditorStyles.miniLabel);
+
+ //           EditorGUILayout.Space();
+//            EditorUtilities.DrawHeaderLabel("Fill");
 
             PropertyField(_fillGradient, Labels.Gradient);
             PropertyField(_fillOpacity, Labels.Opacity);

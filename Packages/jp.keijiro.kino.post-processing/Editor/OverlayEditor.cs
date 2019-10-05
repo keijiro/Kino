@@ -1,55 +1,51 @@
+using UnityEditor.Rendering;
 using UnityEngine;
-using UnityEditor;
-using UnityEngine.Rendering.PostProcessing;
-using UnityEditor.Rendering.PostProcessing;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace Kino.PostProcessing
 {
-    class OverlayEditorBase<T> : PostProcessEffectEditor<T> where T : OverlayBase
+    [VolumeComponentEditor(typeof(Overlay))]
+    sealed class OverlayEditor : VolumeComponentEditor
     {
-        SerializedParameterOverride _source;
-        SerializedParameterOverride _blendMode;
-        SerializedParameterOverride _opacity;
-
-        SerializedParameterOverride _color;
-
-        SerializedParameterOverride _gradient;
-        SerializedParameterOverride _angle;
-
-        SerializedParameterOverride _texture;
-        SerializedParameterOverride _sourceAlpha;
+        SerializedDataParameter _sourceType;
+        SerializedDataParameter _blendMode;
+        SerializedDataParameter _opacity;
+        SerializedDataParameter _color;
+        SerializedDataParameter _gradient;
+        SerializedDataParameter _angle;
+        SerializedDataParameter _texture;
+        SerializedDataParameter _sourceAlpha;
 
         public override void OnEnable()
         {
-            _source    = FindParameterOverride(x => x.source);
-            _blendMode = FindParameterOverride(x => x.blendMode);
-            _opacity   = FindParameterOverride(x => x.opacity);
+            var o = new PropertyFetcher<Overlay>(serializedObject);
 
-            _color = FindParameterOverride(x => x.color);
-
-            _gradient = FindParameterOverride(x => x.gradient);
-            _angle    = FindParameterOverride(x => x.angle);
-
-            _texture     = FindParameterOverride(x => x.texture);
-            _sourceAlpha = FindParameterOverride(x => x.sourceAlpha);
+            _sourceType  = Unpack(o.Find(x => x.sourceType));
+            _blendMode   = Unpack(o.Find(x => x.blendMode));
+            _opacity     = Unpack(o.Find(x => x.opacity));
+            _color       = Unpack(o.Find(x => x.color));
+            _gradient    = Unpack(o.Find(x => x.gradient));
+            _angle       = Unpack(o.Find(x => x.angle));
+            _texture     = Unpack(o.Find(x => x.texture));
+            _sourceAlpha = Unpack(o.Find(x => x.sourceAlpha));
         }
 
         public override void OnInspectorGUI()
         {
-            PropertyField(_source);
+            PropertyField(_sourceType);
 
-            var source = (Overlay.Source)_source.value.enumValueIndex;
+            var sourceType = (Overlay.SourceType)_sourceType.value.enumValueIndex;
 
-            if (source == Overlay.Source.Color)
+            if (sourceType == Overlay.SourceType.Color)
             {
                 PropertyField(_color);
             }
-            else if (source == Overlay.Source.Gradient)
+            else if (sourceType == Overlay.SourceType.Gradient)
             {
                 PropertyField(_gradient);
                 PropertyField(_angle);
             }
-            else // Overlay.Source.Texture
+            else // Overlay.SourceType.Texture
             {
                 PropertyField(_texture);
                 PropertyField(_sourceAlpha);
@@ -59,10 +55,4 @@ namespace Kino.PostProcessing
             PropertyField(_opacity);
         }
     }
-
-    [PostProcessEditor(typeof(Overlay))]
-    sealed class OverlayEditor : OverlayEditorBase<Overlay> {}
-
-    [PostProcessEditor(typeof(PreStackOverlay))]
-    sealed class PreStackOverlayEditor : OverlayEditorBase<PreStackOverlay> {}
 }

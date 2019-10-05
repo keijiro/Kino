@@ -1,109 +1,191 @@
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
+using GraphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat;
+using SerializableAttribute = System.SerializableAttribute;
+using System.Collections.Generic;
 
 namespace Kino.PostProcessing
 {
-    [System.Serializable]
-    [PostProcess(typeof(StreakRenderer), PostProcessEvent.BeforeStack, "Kino/Streak")]
-    public sealed class Streak : PostProcessEffectSettings
+    [Serializable, VolumeComponentMenu("Post-processing/Kino/Streak")]
+    public sealed class Streak : CustomPostProcessVolumeComponent, IPostProcessComponent
     {
-        [Range(0, 5)] public FloatParameter threshold = new FloatParameter { value = 1 };
-        [Range(0, 1)] public FloatParameter stretch = new FloatParameter { value = 0.75f };
-        [Range(0, 1)] public FloatParameter intensity = new FloatParameter { value = 0 };
-        [ColorUsage(false)] public ColorParameter tint = new ColorParameter { value = new Color(0.55f, 0.55f, 1) };
-    }
+        #region Effect parameters
 
-    public sealed class StreakRenderer : PostProcessEffectRenderer<Streak>
-    {
-        const int MaxMipLevel = 16;
+        public ClampedFloatParameter threshold = new ClampedFloatParameter(1, 0, 5);
+        public ClampedFloatParameter stretch = new ClampedFloatParameter(0.75f, 0, 1);
+        public ClampedFloatParameter intensity = new ClampedFloatParameter(0, 0, 1);
+        public ColorParameter tint = new ColorParameter(new Color(0.55f, 0.55f, 1), false, false, true);
 
-        int[] _mipWidth;
-        int[] _rtMipDown;
-        int[] _rtMipUp;
-        int _idHighTex;
+        #endregion
 
-        public override void Init()
+        #region Private members
+
+        static class ShaderIDs
         {
-            _mipWidth = new int[MaxMipLevel];
-
-            _rtMipDown = new int[MaxMipLevel];
-            _rtMipUp = new int[MaxMipLevel];
-
-            for (var i = 0; i < MaxMipLevel; i++)
-            {
-                _rtMipDown[i] = Shader.PropertyToID("_MipDown" + i);
-                _rtMipUp[i] = Shader.PropertyToID("_MipUp" + i);
-            }
-
-            _idHighTex = Shader.PropertyToID("_HighTex");
+            internal static readonly int Color = Shader.PropertyToID("_Color");
+            internal static readonly int HighTexture = Shader.PropertyToID("_HighTexture");
+            internal static readonly int InputTexture = Shader.PropertyToID("_InputTexture");
+            internal static readonly int Intensity = Shader.PropertyToID("_Intensity");
+            internal static readonly int SourceTexture = Shader.PropertyToID("_SourceTexture");
+            internal static readonly int Stretch = Shader.PropertyToID("_Stretch");
+            internal static readonly int Threshold = Shader.PropertyToID("_Threshold");
         }
 
-        public override void Render(PostProcessRenderContext context)
+        Material _material;
+        MaterialPropertyBlock _prop;
+
+        // Image pyramid storage
+        // We have to use different pyramids for each camera, so we use a
+        // dictionary and camera GUIDs as a key to store each pyramid.
+        Dictionary<int, StreakPyramid> _pyramids;
+
+        StreakPyramid GetPyramid(HDCamera camera)
         {
-            var cmd = context.command;
-            cmd.BeginSample("Streak");
+            StreakPyramid candid;
+            var cameraID = camera.camera.GetInstanceID();
 
-            // Shader uniforms
-            var sheet = context.propertySheets.Get(Shader.Find("Hidden/Kino/PostProcessing/Streak"));
-            sheet.properties.SetFloat("_Threshold", settings.threshold);
-            sheet.properties.SetFloat("_Stretch", settings.stretch);
-            sheet.properties.SetFloat("_Intensity", settings.intensity);
-            sheet.properties.SetColor("_Color", settings.tint);
-
-            // Calculate the mip widths.
-            _mipWidth[0] = context.screenWidth;
-            for (var i = 1; i < MaxMipLevel; i++)
-                _mipWidth[i] = _mipWidth[i - 1] / 2;
-
-            // Apply the prefilter and store into MIP 0.
-            var height = context.screenHeight / 2;
-            context.GetScreenSpaceTemporaryRT(
-                cmd, _rtMipDown[0], 0,
-                RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Default,
-                FilterMode.Bilinear, _mipWidth[0], height
-            );
-            cmd.BlitFullscreenTriangle(context.source, _rtMipDown[0], sheet, 0);
-
-            // Build the MIP pyramid.
-            var level = 1;
-            for (; level < MaxMipLevel && _mipWidth[level] > 7; level++)
+            if (_pyramids.TryGetValue(cameraID, out candid))
             {
-                context.GetScreenSpaceTemporaryRT(
-                    cmd, _rtMipDown[level], 0,
-                    RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Default,
-                    FilterMode.Bilinear, _mipWidth[level], height
-                );
-                cmd.BlitFullscreenTriangle(_rtMipDown[level - 1], _rtMipDown[level], sheet, 1);
+                // Reallocate the RTs when the screen size was changed.
+                if (!candid.CheckSize(camera)) candid.Reallocate(camera);
+            }
+            else
+            {
+                // No one found: Allocate a new pyramid.
+                _pyramids[cameraID] = candid = new StreakPyramid(camera);
             }
 
-            // MIP 0 is not needed at this point.
-            cmd.ReleaseTemporaryRT(_rtMipDown[level]);
+            return candid;
+        }
 
-            // Upsample and combine.
-            var lastRT = _rtMipDown[--level];
+        #endregion
+
+        #region IPostProcessComponent implementation
+
+        public bool IsActive() => _material != null && intensity.value > 0;
+
+        #endregion
+
+        #region CustomPostProcessVolumeComponent implementation
+
+        public override CustomPostProcessInjectionPoint injectionPoint =>
+            CustomPostProcessInjectionPoint.BeforePostProcess;
+
+        public override void Setup()
+        {
+            _material = CoreUtils.CreateEngineMaterial("Hidden/Kino/PostProcess/Streak");
+            _prop = new MaterialPropertyBlock();
+            _pyramids = new Dictionary<int, StreakPyramid>();
+        }
+
+        public override void Render(CommandBuffer cmd, HDCamera camera, RTHandle srcRT, RTHandle destRT)
+        {
+            var pyramid = GetPyramid(camera);
+
+            // Common parameters
+            _material.SetFloat("_Threshold", threshold.value);
+            _material.SetFloat("_Stretch", stretch.value);
+            _material.SetFloat("_Intensity", intensity.value);
+            _material.SetColor("_Color", tint.value);
+            _material.SetTexture("_SourceTexture", srcRT);
+
+            // Source -> Prefilter -> MIP 0
+            HDUtils.DrawFullScreen(cmd, _material, pyramid[0].down, _prop, 0);
+
+            // Downsample
+            var level = 1;
+            for (; level < StreakPyramid.MaxMipLevel && pyramid[level].down != null; level++)
+            {
+                _prop.SetTexture(ShaderIDs.InputTexture, pyramid[level - 1].down);
+                HDUtils.DrawFullScreen(cmd, _material, pyramid[level].down, _prop, 1);
+            }
+
+            // Upsample & combine
+            var lastRT = pyramid[--level].down;
             for (level--; level >= 1; level--)
             {
-                context.GetScreenSpaceTemporaryRT(
-                    cmd, _rtMipUp[level], 0,
-                    RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Default,
-                    FilterMode.Bilinear, _mipWidth[level], height
-                );
-                cmd.SetGlobalTexture(_idHighTex, _rtMipDown[level]);
-                cmd.BlitFullscreenTriangle(lastRT, _rtMipUp[level], sheet, 2);
-
-                cmd.ReleaseTemporaryRT(_rtMipDown[level]);
-                cmd.ReleaseTemporaryRT(lastRT);
-
-                lastRT = _rtMipUp[level];
+                var mip = pyramid[level];
+                _prop.SetTexture(ShaderIDs.InputTexture, lastRT);
+                _prop.SetTexture(ShaderIDs.HighTexture, mip.down);
+                HDUtils.DrawFullScreen(cmd, _material, mip.up, _prop, 2);
+                lastRT = mip.up;
             }
 
-            // Final composition.
-            cmd.SetGlobalTexture(_idHighTex, context.source);
-            cmd.BlitFullscreenTriangle(lastRT, context.destination, sheet, 3);
+            // Final composition
+            _prop.SetTexture(ShaderIDs.InputTexture, lastRT);
+            HDUtils.DrawFullScreen(cmd, _material, destRT, _prop, 3);
+        }
 
-            // Cleaning up.
-            cmd.ReleaseTemporaryRT(lastRT);
-            cmd.EndSample("Streak");
+        public override void Cleanup()
+        {
+            CoreUtils.Destroy(_material);
+            foreach (var pyramid in _pyramids.Values) pyramid.Release();
+        }
+
+        #endregion
+    }
+
+    #region Image pyramid class used in Streak effect
+
+    sealed class StreakPyramid
+    {
+        public const int MaxMipLevel = 16;
+
+        int _baseWidth, _baseHeight;
+        readonly (RTHandle down, RTHandle up) [] _mips = new (RTHandle, RTHandle) [MaxMipLevel];
+
+        public (RTHandle down, RTHandle up) this [int index]
+        {
+            get { return _mips[index]; }
+        }
+
+        public StreakPyramid(HDCamera camera)
+        {
+            Allocate(camera);
+        }
+
+        public bool CheckSize(HDCamera camera)
+        {
+            return _baseWidth == camera.actualWidth && _baseHeight == camera.actualHeight;
+        }
+
+        public void Reallocate(HDCamera camera)
+        {
+            Release();
+            Allocate(camera);
+        }
+
+        public void Release()
+        {
+            foreach (var mip in _mips)
+            {
+                if (mip.down != null) RTHandles.Release(mip.down);
+                if (mip.up   != null) RTHandles.Release(mip.up);
+            }
+        }
+
+        void Allocate(HDCamera camera)
+        {
+            _baseWidth = camera.actualWidth;
+            _baseHeight = camera.actualHeight;
+
+            var width = _baseWidth;
+            var height = _baseHeight / 2;
+
+            const GraphicsFormat RTFormat = GraphicsFormat.R16G16B16A16_SFloat;
+
+            _mips[0] = (RTHandles.Alloc(width, height, colorFormat: RTFormat), null);
+
+            for (var i = 1; i < MaxMipLevel; i++)
+            {
+                width /= 2;
+                _mips[i] = width < 8 ?  (null, null) :
+                    (RTHandles.Alloc(width, height, colorFormat: RTFormat),
+                     RTHandles.Alloc(width, height, colorFormat: RTFormat));
+            }
         }
     }
+
+    #endregion
 }

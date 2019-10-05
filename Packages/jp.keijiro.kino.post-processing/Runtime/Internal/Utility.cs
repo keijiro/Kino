@@ -1,10 +1,10 @@
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering;
 
 namespace Kino.PostProcessing
 {
     [System.Serializable]
-    public sealed class GradientParameter : ParameterOverride<Gradient>
+    public sealed class GradientParameter : VolumeParameter<Gradient>
     {
         protected override void OnEnable()
         {
@@ -51,15 +51,14 @@ namespace Kino.PostProcessing
             return _colorKeyPropertyIDs[index];
         }
 
-        public static void SetColorKeys(PropertySheet sheet, GradientColorKey[] colorKeys)
+        public static void SetColorKeys(Material material, GradientColorKey[] colorKeys)
         {
             for (var i = 0; i < 8; i++)
-                sheet.properties.SetVector(
+                material.SetVector(
                     GetColorKeyPropertyID(i),
                     colorKeys[Mathf.Min(i, colorKeys.Length - 1)].ToVector()
                 );
         }
-
     }
 
     public static class GradientColorKeyExtension

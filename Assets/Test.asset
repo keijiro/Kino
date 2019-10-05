@@ -1,0 +1,174 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7849751576115427797
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24f077503be6ae942a1e1245dbd53ea9, type: 3}
+  m_Name: Bloom
+  m_EditorClassIdentifier: 
+  active: 1
+  m_AdvancedMode: 0
+  quality:
+    m_OverrideState: 0
+    m_Value: 3
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.1
+    min: 0
+    max: 1
+  scatter:
+    m_OverrideState: 1
+    m_Value: 0.8
+    min: 0
+    max: 1
+  tint:
+    m_OverrideState: 0
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+    hdr: 0
+    showAlpha: 0
+    showEyeDropper: 1
+  dirtTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+  dirtIntensity:
+    m_OverrideState: 0
+    m_Value: 0
+    min: 0
+  prefilter:
+    m_OverrideState: 0
+    m_Value: 0
+  anamorphic:
+    m_OverrideState: 0
+    m_Value: 1
+  m_Resolution:
+    m_OverrideState: 0
+    m_Value: 2
+  m_HighQualityFiltering:
+    m_OverrideState: 0
+    m_Value: 1
+--- !u!114 &-2273157520953530628
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5f019255bcd1cb489b193b5e8443a27, type: 3}
+  m_Name: Streak
+  m_EditorClassIdentifier: 
+  active: 1
+  m_AdvancedMode: 0
+  threshold:
+    m_OverrideState: 1
+    m_Value: 0.81
+    min: 0
+    max: 5
+  stretch:
+    m_OverrideState: 1
+    m_Value: 0.912
+    min: 0
+    max: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.309
+    min: 0
+    max: 1
+  tint:
+    m_OverrideState: 1
+    m_Value: {r: 0.1745283, g: 0.56761014, b: 1, a: 1}
+    hdr: 0
+    showAlpha: 0
+    showEyeDropper: 1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
+  m_Name: Test
+  m_EditorClassIdentifier: 
+  components:
+  - {fileID: -2273157520953530628}
+  - {fileID: -7849751576115427797}
+  - {fileID: 1056141061363657763}
+--- !u!114 &1056141061363657763
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4ad42d51df0b2f43ba2cab92a53036d, type: 3}
+  m_Name: Recolor
+  m_EditorClassIdentifier: 
+  active: 0
+  m_AdvancedMode: 0
+  edgeColor:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+    hdr: 0
+    showAlpha: 1
+    showEyeDropper: 1
+  edgeSource:
+    m_OverrideState: 1
+    m_Value: 2
+  edgeThreshold:
+    m_OverrideState: 1
+    m_Value: 0.47
+    min: 0
+    max: 1
+  edgeContrast:
+    m_OverrideState: 1
+    m_Value: 0.759
+    min: 0
+    max: 1
+  fillGradient:
+    m_OverrideState: 1
+    m_Value:
+      serializedVersion: 2
+      key0: {r: 0, g: 0, b: 1, a: 1}
+      key1: {r: 1, g: 0, b: 0, a: 1}
+      key2: {r: 0, g: 0, b: 0, a: 0}
+      key3: {r: 0, g: 0, b: 0, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 29298
+      ctime1: 65535
+      ctime2: 0
+      ctime3: 0
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 1
+      m_NumColorKeys: 2
+      m_NumAlphaKeys: 2
+  fillOpacity:
+    m_OverrideState: 1
+    m_Value: 1
+    min: 0
+    max: 1

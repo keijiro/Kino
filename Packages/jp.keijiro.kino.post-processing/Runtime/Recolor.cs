@@ -1,101 +1,109 @@
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
+using SerializableAttribute = System.SerializableAttribute;
 
 namespace Kino.PostProcessing
 {
-    #region Effect settings
-
-    [System.Serializable]
-    [PostProcess(typeof(RecolorRenderer), PostProcessEvent.BeforeStack, "Kino/Recolor")]
-    public sealed class Recolor : PostProcessEffectSettings
+    [Serializable, VolumeComponentMenu("Post-processing/Kino/Recolor")]
+    public sealed class Recolor : CustomPostProcessVolumeComponent, IPostProcessComponent
     {
+        #region Local enum and wrapper class
+
         public enum EdgeSource { Color, Depth, Normal }
+        [Serializable] public sealed class EdgeSourceParameter : VolumeParameter<EdgeSource> {}
 
-        [System.Serializable]
-        public sealed class EdgeSourceParameter : ParameterOverride<EdgeSource> {}
+        #endregion
 
-        public ColorParameter edgeColor = new ColorParameter { value = new Color(0, 0, 0, 0) };
+        #region Effect parameters
 
+        public ColorParameter edgeColor = new ColorParameter(new Color(0, 0, 0, 0), false, true, true);
         public EdgeSourceParameter edgeSource = new EdgeSourceParameter { value = EdgeSource.Depth };
-
-        [Range(0, 1)] public FloatParameter edgeThreshold = new FloatParameter { value = 0.5f };
-
-        [Range(0, 1)] public FloatParameter edgeContrast = new FloatParameter { value = 0.5f };
-
+        public ClampedFloatParameter edgeThreshold = new ClampedFloatParameter(0.5f, 0, 1);
+        public ClampedFloatParameter edgeContrast = new ClampedFloatParameter(0.5f, 0, 1);
         public GradientParameter fillGradient = new GradientParameter();
+        public ClampedFloatParameter fillOpacity = new ClampedFloatParameter(0, 0, 1);
 
-        [Range(0, 1)] public FloatParameter fillOpacity = new FloatParameter { value = 0 };
-    }
+        #endregion
 
-    #endregion
+        #region Private members
 
-    #region Effect renderer
-
-    sealed class RecolorRenderer : PostProcessEffectRenderer<Recolor>
-    {
         static class ShaderIDs
         {
             internal static readonly int EdgeColor = Shader.PropertyToID("_EdgeColor");
             internal static readonly int EdgeThresholds = Shader.PropertyToID("_EdgeThresholds");
             internal static readonly int FillOpacity = Shader.PropertyToID("_FillOpacity");
+            internal static readonly int InputTexture = Shader.PropertyToID("_InputTexture");
         }
 
+        Material _material;
         GradientColorKey[] _gradientCache;
 
-        Vector2 EdgeThresholdVector {
-            get {
-                if (settings.edgeSource == Recolor.EdgeSource.Depth)
-                {
-                    var thresh = 1 / Mathf.Lerp(1000, 1, settings.edgeThreshold);
-                    var scaler = 1 + 2 / (1.01f - settings.edgeContrast);
-                    return new Vector2(thresh, thresh * scaler);
-                }
-                else // Depth & Color
-                {
-                    var thresh = settings.edgeThreshold;
-                    return new Vector2(thresh, thresh + 1.01f - settings.edgeContrast);
-                }
-            }
-        }
+        #endregion
 
-        public override void Init()
+        #region IPostProcessComponent implementation
+
+        public bool IsActive() =>
+            _material != null && (edgeColor.value.a > 0 || fillOpacity.value > 0);
+
+        #endregion
+
+        #region CustomPostProcessVolumeComponent implementation
+
+        public override CustomPostProcessInjectionPoint injectionPoint =>
+            CustomPostProcessInjectionPoint.AfterPostProcess;
+
+        public override void Setup()
         {
+            _material = CoreUtils.CreateEngineMaterial("Hidden/Kino/PostProcess/Recolor");
+
         #if !UNITY_EDITOR
             // At runtime, copy gradient color keys only once on initialization.
-            _gradientCache = settings.fillGradient.value.colorKeys;
+            _gradientCache = fillGradient.value.colorKeys;
         #endif
         }
 
-        public override DepthTextureMode GetCameraFlags()
-        {
-            return settings.edgeSource == Recolor.EdgeSource.Depth ?
-                DepthTextureMode.Depth : DepthTextureMode.None;
-        }
-
-        public override void Render(PostProcessRenderContext context)
+        public override void Render(CommandBuffer cmd, HDCamera camera, RTHandle srcRT, RTHandle destRT)
         {
         #if UNITY_EDITOR
             // In editor, copy gradient color keys every frame.
-            _gradientCache = settings.fillGradient.value.colorKeys;
+            _gradientCache = fillGradient.value.colorKeys;
         #endif
 
-            var cmd = context.command;
-            cmd.BeginSample("Recolor");
+            Vector2 edgeThresh;
 
-            var sheet = context.propertySheets.Get(Shader.Find("Hidden/Kino/PostProcessing/Recolor"));
-            sheet.properties.SetColor(ShaderIDs.EdgeColor, settings.edgeColor);
-            sheet.properties.SetVector(ShaderIDs.EdgeThresholds, EdgeThresholdVector);
-            sheet.properties.SetFloat(ShaderIDs.FillOpacity, settings.fillOpacity);
-            GradientUtility.SetColorKeys(sheet, _gradientCache);
+            if (edgeSource == EdgeSource.Depth)
+            {
+                var thresh = 1 / Mathf.Lerp(1000, 1, edgeThreshold.value);
+                var scaler = 1 + 2 / (1.01f - edgeContrast.value);
+                edgeThresh = new Vector2(thresh, thresh * scaler);
+            }
+            else // Depth & Color
+            {
+                var t1 = edgeThreshold.value;
+                var t2 = t1 + 1.01f - edgeContrast.value;
+                edgeThresh = new Vector2(t1, t2);
+            }
 
-            var pass = (int)settings.edgeSource.value;
-            if (settings.fillOpacity > 0 && _gradientCache.Length > 3) pass += 3;
-            if (settings.fillGradient.value.mode == GradientMode.Blend) pass += 6;
-            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, pass);
+            _material.SetColor(ShaderIDs.EdgeColor, edgeColor.value);
+            _material.SetVector(ShaderIDs.EdgeThresholds, edgeThresh);
+            _material.SetFloat(ShaderIDs.FillOpacity, fillOpacity.value);
+            GradientUtility.SetColorKeys(_material, _gradientCache);
 
-            cmd.EndSample("Recolor");
+            var pass = (int)edgeSource.value;
+            if (fillOpacity.value > 0 && _gradientCache.Length > 3) pass += 3;
+            if (fillGradient.value.mode == GradientMode.Blend) pass += 6;
+
+            // Blit to destRT with the overlay shader.
+            _material.SetTexture(ShaderIDs.InputTexture, srcRT);
+            HDUtils.DrawFullScreen(cmd, _material, destRT, null, pass);
         }
-    }
 
-    #endregion
+        public override void Cleanup()
+        {
+            CoreUtils.Destroy(_material);
+        }
+
+        #endregion
+    }
 }

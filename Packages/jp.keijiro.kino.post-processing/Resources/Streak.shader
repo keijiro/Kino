@@ -1,44 +1,71 @@
-﻿Shader "Hidden/Kino/PostProcessing/Streak"
+Shader "Hidden/Kino/PostProcess/Streak"
 {
     HLSLINCLUDE
 
-    #include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+    #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+    #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+    #include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 
-    TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-    TEXTURE2D_SAMPLER2D(_HighTex, sampler_HighTex);
+    struct Attributes
+    {
+        uint vertexID : SV_VertexID;
+        UNITY_VERTEX_INPUT_INSTANCE_ID
+    };
 
-    float4 _MainTex_TexelSize;
+    struct Varyings
+    {
+        float4 positionCS : SV_POSITION;
+        float2 texcoord   : TEXCOORD0;
+        UNITY_VERTEX_OUTPUT_STEREO
+    };
+
+    Varyings Vertex(Attributes input)
+    {
+        Varyings output;
+        UNITY_SETUP_INSTANCE_ID(input);
+        UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+        output.positionCS = GetFullScreenTriangleVertexPosition(input.vertexID);
+        output.texcoord = GetFullScreenTriangleTexCoord(input.vertexID);
+        return output;
+    }
+
+    TEXTURE2D_X(_SourceTexture);
+    TEXTURE2D(_InputTexture);
+    TEXTURE2D(_HighTexture);
+
+    float4 _InputTexture_TexelSize;
+
     float _Threshold;
     float _Stretch;
     float _Intensity;
-    half3 _Color;
+    float3 _Color;
 
     // Prefilter: Shrink horizontally and apply threshold.
-    half4 FragPrefilter(VaryingsDefault i) : SV_Target
+    float4 FragmentPrefilter(Varyings input) : SV_Target
     {
-        // Actually this should be 1, but we assume you need more blur...
-        const float vscale = 1.5;
-        const float dy = _MainTex_TexelSize.y * vscale / 2;
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-        float2 uv = i.texcoord;
-        half3 c0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(uv.x, uv.y - dy)).rgb;
-        half3 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(uv.x, uv.y + dy)).rgb;
-        half3 c = (c0 + c1) / 2;
+        uint2 positionSS = input.texcoord * _ScreenSize.xy - float2(0, 0.5);
+        float3 c0 = LOAD_TEXTURE2D_X(_SourceTexture, positionSS).rgb;
+        float3 c1 = LOAD_TEXTURE2D_X(_SourceTexture, positionSS + uint2(0, 1)).rgb;
+        float3 c = (c0 + c1) / 2;
 
         float br = max(c.r, max(c.g, c.b));
         c *= max(0, br - _Threshold) / max(br, 1e-5);
 
-        return half4(c, 1);
+        return float4(c, 1);
     }
 
     // Downsampler
-    half4 FragDownsample(VaryingsDefault i) : SV_Target
+    float4 FragmentDownsample(Varyings input) : SV_Target
     {
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
         // Actually this should be 1, but we assume you need more blur...
         const float hscale = 1.25;
-        const float dx = _MainTex_TexelSize.x * hscale;
+        const float dx = hscale * _InputTexture_TexelSize.x;
 
-        float2 uv = i.texcoord;
+        float2 uv = input.texcoord;
         float u0 = uv.x - dx * 5;
         float u1 = uv.x - dx * 3;
         float u2 = uv.x - dx * 1;
@@ -46,12 +73,12 @@
         float u4 = uv.x + dx * 3;
         float u5 = uv.x + dx * 5;
 
-        half3 c0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(u0, uv.y)).rgb;
-        half3 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(u1, uv.y)).rgb;
-        half3 c2 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(u2, uv.y)).rgb;
-        half3 c3 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(u3, uv.y)).rgb;
-        half3 c4 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(u4, uv.y)).rgb;
-        half3 c5 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, float2(u5, uv.y)).rgb;
+        half3 c0 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, float2(u0, uv.y)).rgb;
+        half3 c1 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, float2(u1, uv.y)).rgb;
+        half3 c2 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, float2(u2, uv.y)).rgb;
+        half3 c3 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, float2(u3, uv.y)).rgb;
+        half3 c4 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, float2(u4, uv.y)).rgb;
+        half3 c5 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, float2(u5, uv.y)).rgb;
 
         // Simple box filter
         half3 c = (c0 + c1 + c2 + c3 + c4 + c5) / 6;
@@ -60,24 +87,34 @@
     }
 
     // Upsampler
-    half4 FragUpsample(VaryingsDefault i) : SV_Target
+    float4 FragmentUpsample(Varyings input) : SV_Target
     {
-        half3 c0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb / 4;
-        half3 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb / 2;
-        half3 c2 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb / 4;
-        half3 c3 = SAMPLE_TEXTURE2D(_HighTex, sampler_HighTex, i.texcoord).rgb;
-        return half4(lerp(c3, c0 + c1 + c2, _Stretch), 1);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+        float2 uv = input.texcoord;
+        float3 c0 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, uv).rgb / 4;
+        float3 c1 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, uv).rgb / 2;
+        float3 c2 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, uv).rgb / 4;
+        float3 c3 = SAMPLE_TEXTURE2D(_HighTexture,  s_linear_clamp_sampler, uv).rgb;
+
+        return float4(lerp(c3, c0 + c1 + c2, _Stretch), 1);
     }
 
     // Final composition
-    half4 FragComposition(VaryingsDefault i) : SV_Target
+    float4 FragmentComposition(Varyings input) : SV_Target
     {
-        half3 c0 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb / 4;
-        half3 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb / 2;
-        half3 c2 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord).rgb / 4;
-        half3 c3 = SAMPLE_TEXTURE2D(_HighTex, sampler_HighTex, i.texcoord).rgb;
-        half3 cf = (c0 + c1 + c2) * _Color * _Intensity * 5;
-        return half4(cf + c3, 1);
+        UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+        float2 uv = input.texcoord;
+        uint2 positionSS = uv * _ScreenSize.xy;
+
+        float3 c0 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, uv).rgb / 4;
+        float3 c1 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, uv).rgb / 2;
+        float3 c2 = SAMPLE_TEXTURE2D(_InputTexture, s_linear_clamp_sampler, uv).rgb / 4;
+        float3 c3 = LOAD_TEXTURE2D_X(_SourceTexture, positionSS).rgb;
+        float3 cf = (c0 + c1 + c2) * _Color * _Intensity * 5;
+
+        return float4(cf + c3, 1);
     }
 
     ENDHLSL
@@ -88,30 +125,31 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment FragPrefilter
+            #pragma vertex Vertex
+            #pragma fragment FragmentPrefilter
             ENDHLSL
         }
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment FragDownsample
+            #pragma vertex Vertex
+            #pragma fragment FragmentDownsample
             ENDHLSL
         }
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment FragUpsample
+            #pragma vertex Vertex
+            #pragma fragment FragmentUpsample
             ENDHLSL
         }
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment FragComposition
+            #pragma vertex Vertex
+            #pragma fragment FragmentComposition
             ENDHLSL
         }
     }
+    Fallback Off
 }

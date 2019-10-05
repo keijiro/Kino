@@ -1,17 +1,41 @@
-#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
-#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/Colors.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 
-TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
-half3 _Color;
-half _Opacity;
+struct Attributes
+{
+    uint vertexID : SV_VertexID;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
+
+struct Varyings
+{
+    float4 positionCS : SV_POSITION;
+    float2 texcoord   : TEXCOORD0;
+    UNITY_VERTEX_OUTPUT_STEREO
+};
+
+Varyings Vertex(Attributes input)
+{
+    Varyings output;
+    UNITY_SETUP_INSTANCE_ID(input);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+    output.positionCS = GetFullScreenTriangleVertexPosition(input.vertexID);
+    output.texcoord = GetFullScreenTriangleTexCoord(input.vertexID);
+    return output;
+}
+
+TEXTURE2D_X(_InputTexture);
+float3 _Color;
+float _Opacity;
 
 //
 // Blend function
 //
 
-half4 BlendFunction(half4 c1, half4 c2)
+float4 BlendFunction(float4 c1, float4 c2)
 {
-    half4 c;
+    float4 c;
 
 #if defined(OVERLAY_BLEND_NORMAL)
 
@@ -27,14 +51,14 @@ half4 BlendFunction(half4 c1, half4 c2)
 
 #elif defined(OVERLAY_BLEND_SOFTLIGHT)
 
-    half4 a = c1 * c2 * 2 + (1 - c2 * 2) * c1 * c1;
-    half4 b = (1 - c2) * c1 * 2 + (c2 * 2 - 1) * sqrt(c1);
+    float4 a = c1 * c2 * 2 + (1 - c2 * 2) * c1 * c1;
+    float4 b = (1 - c2) * c1 * 2 + (c2 * 2 - 1) * sqrt(c1);
     c = lerp(a, b, c2 > 0.5);
 
 #else
 
-    half4 a = c1 * c2 * 2;
-    half4 b = 1 - (1 - c1) * (1 - c2) * 2;
+    float4 a = c1 * c2 * 2;
+    float4 b = 1 - (1 - c1) * (1 - c2) * 2;
 
     #if defined(OVERLAY_BLEND_OVERLAY)
 
@@ -55,27 +79,27 @@ half4 BlendFunction(half4 c1, half4 c2)
 // Texture mode
 //
 
-TEXTURE2D_SAMPLER2D(_SourceTex, sampler_SourceTex);
-half _UseSourceAlpha;
+TEXTURE2D(_OverlayTexture);
+SAMPLER(sampler_OverlayTexture);
+float _UseTextureAlpha;
 
-half4 FragTexture(VaryingsDefault i) : SV_Target
+float4 FragmentTexture(Varyings input) : SV_Target
 {
-    half4 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
-    half4 c2 = SAMPLE_TEXTURE2D(_SourceTex, sampler_SourceTex, i.texcoord);
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-#if !defined(UNITY_COLORSPACE_GAMMA)
+    uint2 positionSS = input.texcoord * _ScreenSize.xy;
+    float4 c1 = LOAD_TEXTURE2D_X(_InputTexture, positionSS);
+    float4 c2 = SAMPLE_TEXTURE2D(_OverlayTexture, sampler_OverlayTexture, input.texcoord);
+
     c1.rgb = LinearToSRGB(c1.rgb);
     c2.rgb = LinearToSRGB(c2.rgb);
-#endif
 
     c2.rgb *= _Color;
-    c2.a = _Opacity * lerp(1, c2.a, _UseSourceAlpha);
+    c2.a = _Opacity * lerp(1, c2.a, _UseTextureAlpha);
 
-    half4 c = BlendFunction(c1, c2);
+    float4 c = BlendFunction(c1, c2);
 
-#if !defined(UNITY_COLORSPACE_GAMMA)
     c.rgb = SRGBToLinear(c.rgb);
-#endif
 
     return c;
 }
@@ -84,26 +108,27 @@ half4 FragTexture(VaryingsDefault i) : SV_Target
 // Gradient mode
 //
 
-half2 _Direction;
-half4 _ColorKey0;
-half4 _ColorKey1;
-half4 _ColorKey2;
-half4 _ColorKey3;
-half4 _ColorKey4;
-half4 _ColorKey5;
-half4 _ColorKey6;
-half4 _ColorKey7;
+float2 _Direction;
+float4 _ColorKey0;
+float4 _ColorKey1;
+float4 _ColorKey2;
+float4 _ColorKey3;
+float4 _ColorKey4;
+float4 _ColorKey5;
+float4 _ColorKey6;
+float4 _ColorKey7;
 
-half4 FragGradient(VaryingsDefault i) : SV_Target
+float4 FragmentGradient(Varyings input) : SV_Target
 {
-    half4 c1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.texcoord);
+    UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-#if !defined(UNITY_COLORSPACE_GAMMA)
+    uint2 positionSS = input.texcoord * _ScreenSize.xy;
+    float4 c1 = LOAD_TEXTURE2D_X(_InputTexture, positionSS);
+
     c1.rgb = LinearToSRGB(c1.rgb);
-#endif
 
-    half p = dot(i.texcoord - 0.5f, _Direction) + 0.5f;
-    half3 c2 = _ColorKey0.rgb;
+    float p = dot(input.texcoord - 0.5f, _Direction) + 0.5f;
+    float3 c2 = _ColorKey0.rgb;
     c2 = lerp(c2, _ColorKey1.rgb, saturate((p - _ColorKey0.w) / (_ColorKey1.w - _ColorKey0.w)));
     c2 = lerp(c2, _ColorKey2.rgb, saturate((p - _ColorKey1.w) / (_ColorKey2.w - _ColorKey1.w)));
 
@@ -115,11 +140,9 @@ half4 FragGradient(VaryingsDefault i) : SV_Target
     c2 = lerp(c2, _ColorKey7.rgb, saturate((p - _ColorKey6.w) / (_ColorKey7.w - _ColorKey6.w)));
 #endif
 
-    half4 c = BlendFunction(c1, half4(c2, _Opacity));
+    float4 c = BlendFunction(c1, float4(c2, _Opacity));
 
-#if !defined(UNITY_COLORSPACE_GAMMA)
     c.rgb = SRGBToLinear(c.rgb);
-#endif
 
     return c;
 }

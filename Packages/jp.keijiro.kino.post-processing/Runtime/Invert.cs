@@ -1,39 +1,37 @@
-using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
+﻿using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace Kino.PostProcessing
 {
-    #region Effect settings
-
-    [System.Serializable]
-    [PostProcess(typeof(InvertRenderer), PostProcessEvent.AfterStack, "Kino/Invert")]
-    public sealed class Invert : PostProcessEffectSettings
+    [System.Serializable, VolumeComponentMenu("Post-processing/Kino/Invert")]
+    public sealed class Invert : CustomPostProcessVolumeComponent, IPostProcessComponent
     {
-        [Range(0, 1)] public FloatParameter strength = new FloatParameter();
-    }
+        public ClampedFloatParameter intensity = new ClampedFloatParameter(0, 0, 1);
 
-    #endregion
+        Material _material;
 
-    #region Effect renderer
+        public bool IsActive() => _material != null && intensity.value > 0;
 
-    sealed class InvertRenderer : PostProcessEffectRenderer<Invert>
-    {
-        static class ShaderIDs
+        public override CustomPostProcessInjectionPoint injectionPoint =>
+            CustomPostProcessInjectionPoint.AfterPostProcess;
+
+        public override void Setup()
         {
-            internal static readonly int Strength = Shader.PropertyToID("_Strength");
+            _material = CoreUtils.CreateEngineMaterial("Hidden/Kino/PostProcess/Invert");
         }
 
-        public override void Render(PostProcessRenderContext context)
+        public override void Render(CommandBuffer cmd, HDCamera camera, RTHandle srcRT, RTHandle destRT)
         {
-            var sheet = context.propertySheets.Get(Shader.Find("Hidden/Kino/PostProcessing/Invert"));
-            sheet.properties.SetFloat(ShaderIDs.Strength, settings.strength);
+            if (_material == null) return;
+            _material.SetFloat("_Intensity", intensity.value);
+            _material.SetTexture("_InputTexture", srcRT);
+            HDUtils.DrawFullScreen(cmd, _material, destRT);
+        }
 
-            var cmd = context.command;
-            cmd.BeginSample("Invert");
-            cmd.BlitFullscreenTriangle(context.source, context.destination, sheet, 0);
-            cmd.EndSample("Invert");
+        public override void Cleanup()
+        {
+            CoreUtils.Destroy(_material);
         }
     }
-
-    #endregion
 }

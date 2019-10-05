@@ -1,4 +1,4 @@
-﻿Shader "Hidden/Kino/PostProcessing/Recolor"
+Shader "Hidden/Kino/PostProcess/Recolor"
 {
     SubShader
     {
@@ -8,8 +8,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_COLOR
             #include "Recolor.hlsl"
             ENDHLSL
@@ -17,8 +17,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_DEPTH
             #include "Recolor.hlsl"
             ENDHLSL
@@ -26,8 +26,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_NORMAL
             #include "Recolor.hlsl"
             ENDHLSL
@@ -37,8 +37,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_COLOR
             #define RECOLOR_GRADIENT_EXT
             #include "Recolor.hlsl"
@@ -47,8 +47,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_DEPTH
             #define RECOLOR_GRADIENT_EXT
             #include "Recolor.hlsl"
@@ -57,8 +57,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_NORMAL
             #define RECOLOR_GRADIENT_EXT
             #include "Recolor.hlsl"
@@ -69,8 +69,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_COLOR
             #define RECOLOR_GRADIENT_LERP
             #include "Recolor.hlsl"
@@ -79,8 +79,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_DEPTH
             #define RECOLOR_GRADIENT_LERP
             #include "Recolor.hlsl"
@@ -89,8 +89,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_NORMAL
             #define RECOLOR_GRADIENT_LERP
             #include "Recolor.hlsl"
@@ -101,8 +101,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_COLOR
             #define RECOLOR_GRADIENT_EXT
             #define RECOLOR_GRADIENT_LERP
@@ -112,8 +112,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_DEPTH
             #define RECOLOR_GRADIENT_EXT
             #define RECOLOR_GRADIENT_LERP
@@ -123,8 +123,8 @@
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex VertDefault
-            #pragma fragment Frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
             #define RECOLOR_EDGE_NORMAL
             #define RECOLOR_GRADIENT_EXT
             #define RECOLOR_GRADIENT_LERP
@@ -132,4 +132,5 @@
             ENDHLSL
         }
     }
+    Fallback Off
 }

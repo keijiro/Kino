@@ -2,13 +2,19 @@
     "name": "Kino.Postprocessing.Editor",
     "references": [
         "Kino.Postprocessing",
-        "Unity.Postprocessing.Editor",
-        "Unity.Postprocessing.Runtime"
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Unity.RenderPipelines.Core.Editor"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": false
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
