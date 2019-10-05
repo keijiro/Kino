@@ -180,7 +180,7 @@ namespace Kino.PostProcessing
             for (var i = 1; i < MaxMipLevel; i++)
             {
                 width /= 2;
-                _mips[i] = width < 8 ?  (null, null) :
+                _mips[i] = width < 4 ?  (null, null) :
                     (RTHandles.Alloc(width, height, colorFormat: RTFormat),
                      RTHandles.Alloc(width, height, colorFormat: RTFormat));
             }
