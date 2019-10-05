@@ -18,7 +18,7 @@ Effects
 
 ### Streak
 
-![screenshot](https://i.imgur.com/FzwErHmm.jpg)
+![screenshot](https://i.imgur.com/buCdMYm.gif)
 
 **Streak** adds horizontally stretched bloom that roughly resembles anamorphic
 lens flares. Although it's neither physically correct nor energy conserving,
