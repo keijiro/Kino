@@ -89,6 +89,17 @@ After changes, the manifest file should look like below:
 
 [scoped registry]: https://docs.unity3d.com/Manual/upm-scoped.html
 
+Frequently Asked Questions
+--------------------------
+
+#### Nothing happens when I add effects to a volume
+
+Check the Default HDRP Settings in the Project Settings. You have to
+define custom post processing oerders to make them take effect in the
+pipeline.
+
+![HDRP settings](https://i.imgur.com/v6Kddthl.jpg)
+
 License
 -------
 
