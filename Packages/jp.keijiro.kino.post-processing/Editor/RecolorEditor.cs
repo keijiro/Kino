@@ -16,6 +16,8 @@ namespace Kino.PostProcessing
             internal static readonly GUIContent Color     = new GUIContent("Color");
             internal static readonly GUIContent Gradient  = new GUIContent("Gradient");
             internal static readonly GUIContent Opacity   = new GUIContent("Opacity");
+            internal static readonly GUIContent Type      = new GUIContent("Type");
+            internal static readonly GUIContent Strength  = new GUIContent("Strength");
         }
 
         SerializedDataParameter _edgeSource;
@@ -24,17 +26,21 @@ namespace Kino.PostProcessing
         SerializedDataParameter _edgeColor;
         SerializedDataParameter _fillGradient;
         SerializedDataParameter _fillOpacity;
+        SerializedDataParameter _ditherType;
+        SerializedDataParameter _ditherStrength;
 
         public override void OnEnable()
         {
             var o = new PropertyFetcher<Recolor>(serializedObject);
 
-            _edgeColor     = Unpack(o.Find(x => x.edgeColor));
-            _edgeSource    = Unpack(o.Find(x => x.edgeSource));
-            _edgeThreshold = Unpack(o.Find(x => x.edgeThreshold));
-            _edgeContrast  = Unpack(o.Find(x => x.edgeContrast));
-            _fillGradient  = Unpack(o.Find(x => x.fillGradient));
-            _fillOpacity   = Unpack(o.Find(x => x.fillOpacity));
+            _edgeColor      = Unpack(o.Find(x => x.edgeColor));
+            _edgeSource     = Unpack(o.Find(x => x.edgeSource));
+            _edgeThreshold  = Unpack(o.Find(x => x.edgeThreshold));
+            _edgeContrast   = Unpack(o.Find(x => x.edgeContrast));
+            _fillGradient   = Unpack(o.Find(x => x.fillGradient));
+            _fillOpacity    = Unpack(o.Find(x => x.fillOpacity));
+            _ditherType     = Unpack(o.Find(x => x.ditherType));
+            _ditherStrength = Unpack(o.Find(x => x.ditherStrength));
         }
 
         public override void OnInspectorGUI()
@@ -48,11 +54,13 @@ namespace Kino.PostProcessing
 
             EditorGUILayout.LabelField("Fill", EditorStyles.miniLabel);
 
- //           EditorGUILayout.Space();
-//            EditorUtilities.DrawHeaderLabel("Fill");
-
             PropertyField(_fillGradient, Labels.Gradient);
             PropertyField(_fillOpacity, Labels.Opacity);
+
+            EditorGUILayout.LabelField("Dithering", EditorStyles.miniLabel);
+
+            PropertyField(_ditherType, Labels.Type);
+            PropertyField(_ditherStrength, Labels.Strength);
         }
     }
 }

@@ -41,6 +41,9 @@ float4 _ColorKey5;
 float4 _ColorKey6;
 float4 _ColorKey7;
 
+TEXTURE2D(_DitherTexture);
+float _DitherStrength;
+
 float3 LoadWorldNormal(uint2 positionSS)
 {
     NormalData data;
@@ -106,9 +109,16 @@ float4 Fragment(Varyings input) : SV_Target
 
 #endif
 
+    // Dithering
+    uint tw, th;
+    _DitherTexture.GetDimensions(tw, th);
+    float dither = LOAD_TEXTURE2D(_DitherTexture, positionSS % uint2(tw, th)).x;
+    dither = (dither - 0.5) * _DitherStrength;
+
     // Apply fill gradient.
     float3 fill = _ColorKey0.rgb;
-    float lum = Luminance(LinearToSRGB(c0.rgb));
+    float lum = Luminance(c0.rgb) + dither;
+
 #ifdef RECOLOR_GRADIENT_LERP
     fill = lerp(fill, _ColorKey1.rgb, saturate((lum - _ColorKey0.w) / (_ColorKey1.w - _ColorKey0.w)));
     fill = lerp(fill, _ColorKey2.rgb, saturate((lum - _ColorKey1.w) / (_ColorKey2.w - _ColorKey1.w)));
