@@ -13,6 +13,9 @@ namespace Kino.PostProcessing
         public enum EdgeSource { Color, Depth, Normal }
         [Serializable] public sealed class EdgeSourceParameter : VolumeParameter<EdgeSource> {}
 
+        public enum DitherType { Bayer2x2, Bayer3x3, Bayer4x4, Bayer8x8 }
+        [Serializable] public sealed class DitherTypeParameter : VolumeParameter<DitherType> {}
+
         #endregion
 
         #region Effect parameters
@@ -23,6 +26,7 @@ namespace Kino.PostProcessing
         public ClampedFloatParameter edgeContrast = new ClampedFloatParameter(0.5f, 0, 1);
         public GradientParameter fillGradient = new GradientParameter();
         public ClampedFloatParameter fillOpacity = new ClampedFloatParameter(0, 0, 1);
+        public DitherTypeParameter ditherType = new DitherTypeParameter { value = DitherType.Bayer4x4 };
         public ClampedFloatParameter ditherStrength = new ClampedFloatParameter(0, 0, 1);
 
         #endregion
@@ -31,6 +35,8 @@ namespace Kino.PostProcessing
 
         static class ShaderIDs
         {
+            internal static readonly int DitherStrength = Shader.PropertyToID("_DitherStrength");
+            internal static readonly int DitherTexture = Shader.PropertyToID("_DitherTexture");
             internal static readonly int EdgeColor = Shader.PropertyToID("_EdgeColor");
             internal static readonly int EdgeThresholds = Shader.PropertyToID("_EdgeThresholds");
             internal static readonly int FillOpacity = Shader.PropertyToID("_FillOpacity");
@@ -39,6 +45,9 @@ namespace Kino.PostProcessing
 
         Material _material;
         GradientColorKey[] _gradientCache;
+
+        DitherType _ditherType;
+        Texture2D _ditherTexture;
 
         #endregion
 
@@ -66,6 +75,13 @@ namespace Kino.PostProcessing
 
         public override void Render(CommandBuffer cmd, HDCamera camera, RTHandle srcRT, RTHandle destRT)
         {
+            if (_ditherType != ditherType.value)
+            {
+                CoreUtils.Destroy(_ditherTexture);
+                _ditherType = ditherType.value;
+                _ditherTexture = GenerateDitherTexture(_ditherType);
+            }
+
         #if UNITY_EDITOR
             // In editor, copy gradient color keys every frame.
             _gradientCache = fillGradient.value.colorKeys;
@@ -88,9 +104,11 @@ namespace Kino.PostProcessing
 
             _material.SetColor(ShaderIDs.EdgeColor, edgeColor.value);
             _material.SetVector(ShaderIDs.EdgeThresholds, edgeThresh);
-            _material.SetVector(ShaderIDs.FillOpacity,
-                new Vector2(fillOpacity.value, ditherStrength.value));
+            _material.SetFloat(ShaderIDs.FillOpacity, fillOpacity.value);
             GradientUtility.SetColorKeys(_material, _gradientCache);
+
+            _material.SetTexture(ShaderIDs.DitherTexture, _ditherTexture);
+            _material.SetFloat(ShaderIDs.DitherStrength, ditherStrength.value);
 
             var pass = (int)edgeSource.value;
             if (fillOpacity.value > 0 && _gradientCache.Length > 3) pass += 3;
@@ -104,6 +122,62 @@ namespace Kino.PostProcessing
         public override void Cleanup()
         {
             CoreUtils.Destroy(_material);
+            CoreUtils.Destroy(_ditherTexture);
+        }
+
+        #endregion
+
+        #region Dither texture generator
+
+        static Texture2D GenerateDitherTexture(DitherType type)
+        {
+            if (type == DitherType.Bayer2x2)
+            {
+                var tex = new Texture2D(2, 2, TextureFormat.R8, false, true);
+                tex.LoadRawTextureData(new byte [] {0, 170, 255, 85});
+                tex.Apply();
+                return tex;
+            }
+
+            if (type == DitherType.Bayer3x3)
+            {
+                var tex = new Texture2D(3, 3, TextureFormat.R8, false, true);
+                tex.LoadRawTextureData(new byte [] {
+                    0, 223, 95, 191, 159, 63, 127, 31, 255
+                });
+                tex.Apply();
+                return tex;
+            }
+
+            if (type == DitherType.Bayer4x4)
+            {
+                var tex = new Texture2D(4, 4, TextureFormat.R8, false, true);
+                tex.LoadRawTextureData(new byte [] {
+                    0, 136, 34, 170, 204, 68, 238, 102,
+                    51, 187, 17, 153, 255, 119, 221, 85
+                });
+                tex.Apply();
+                return tex;
+            }
+
+            if (type == DitherType.Bayer8x8)
+            {
+                var tex = new Texture2D(8, 8, TextureFormat.R8, false, true);
+                tex.LoadRawTextureData(new byte [] {
+                    0, 194, 48, 242, 12, 206, 60, 255,
+                    129, 64, 178, 113, 141, 76, 190, 125,
+                    32, 226, 16, 210, 44, 238, 28, 222,
+                    161, 97, 145, 80, 174, 109, 157, 93,
+                    8, 202, 56, 250, 4, 198, 52, 246,
+                    137, 72, 186, 121, 133, 68, 182, 117,
+                    40, 234, 24, 218, 36, 230, 20, 214,
+                    170, 105, 153, 89, 165, 101, 149, 85
+                });
+                tex.Apply();
+                return tex;
+            }
+
+            return null;
         }
 
         #endregion

@@ -30,7 +30,7 @@ TEXTURE2D_X(_InputTexture);
 
 float4 _EdgeColor;
 float2 _EdgeThresholds;
-float2 _FillOpacity;
+float _FillOpacity;
 
 float4 _ColorKey0;
 float4 _ColorKey1;
@@ -40,6 +40,9 @@ float4 _ColorKey4;
 float4 _ColorKey5;
 float4 _ColorKey6;
 float4 _ColorKey7;
+
+TEXTURE2D(_DitherTexture);
+float _DitherStrength;
 
 float3 LoadWorldNormal(uint2 positionSS)
 {
@@ -106,23 +109,15 @@ float4 Fragment(Varyings input) : SV_Target
 
 #endif
 
+    // Dithering
+    uint tw, th;
+    _DitherTexture.GetDimensions(tw, th);
+    float dither = LOAD_TEXTURE2D(_DitherTexture, positionSS % uint2(tw, th)).x;
+    dither = (dither - 0.5) * _DitherStrength;
+
     // Apply fill gradient.
     float3 fill = _ColorKey0.rgb;
-    float lum = Luminance(LinearToSRGB(c0.rgb));
-
-    static float dmatrix [] =
-        //{0.0, 0.5, 0.75, 0.25};
-        //{0.0, 0.7777777777777778, 0.3333333333333333, 0.6666666666666666, 0.5555555555555556, 0.2222222222222222, 0.4444444444444444, 0.1111111111111111, 0.8888888888888888};
-        //{0.0, 0.5, 0.125, 0.625, 0.75, 0.25, 0.875, 0.375, 0.1875, 0.6875, 0.0625, 0.5625, 0.9375, 0.4375, 0.8125, 0.3125};
-        {0.0, 0.75, 0.1875, 0.9375, 0.046875, 0.796875, 0.234375, 0.984375, 0.5, 0.25, 0.6875, 0.4375, 0.546875, 0.296875, 0.734375, 0.484375, 0.125, 0.875, 0.0625, 0.8125, 0.171875, 0.921875, 0.109375, 0.859375, 0.625, 0.375, 0.5625, 0.3125, 0.671875, 0.421875, 0.609375, 0.359375, 0.03125, 0.78125, 0.21875, 0.96875, 0.015625, 0.765625, 0.203125, 0.953125, 0.53125, 0.28125, 0.71875, 0.46875, 0.515625, 0.265625, 0.703125, 0.453125, 0.15625, 0.90625, 0.09375, 0.84375, 0.140625, 0.890625, 0.078125, 0.828125, 0.65625, 0.40625, 0.59375, 0.34375, 0.640625, 0.390625, 0.578125, 0.328125};
-
-    //float dither = dmatrix[(positionSS.x & 1) + (positionSS.y & 1) * 2];
-    //float dither = dmatrix[(positionSS.x % 3) + (positionSS.y % 3) * 3];
-    //float dither = dmatrix[(positionSS.x & 3) + (positionSS.y & 3) * 4];
-    float dither = dmatrix[(positionSS.x & 7) + (positionSS.y & 7) * 8];
-
-    //float dither = GenerateHashedRandomFloat(positionSS);
-    lum += (dither - 0.5) * _FillOpacity.y;
+    float lum = Luminance(c0.rgb) + dither;
 
 #ifdef RECOLOR_GRADIENT_LERP
     fill = lerp(fill, _ColorKey1.rgb, saturate((lum - _ColorKey0.w) / (_ColorKey1.w - _ColorKey0.w)));
@@ -147,7 +142,7 @@ float4 Fragment(Varyings input) : SV_Target
 #endif
 
     float edge = smoothstep(_EdgeThresholds.x, _EdgeThresholds.y, g);
-    float3 cb = lerp(c0.rgb, fill, _FillOpacity.x);
+    float3 cb = lerp(c0.rgb, fill, _FillOpacity);
     float3 co = lerp(cb, _EdgeColor.rgb, edge * _EdgeColor.a);
     return float4(co, c0.a);
 }
