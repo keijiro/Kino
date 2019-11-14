@@ -23,6 +23,7 @@ namespace Kino.PostProcessing
         public ClampedFloatParameter edgeContrast = new ClampedFloatParameter(0.5f, 0, 1);
         public GradientParameter fillGradient = new GradientParameter();
         public ClampedFloatParameter fillOpacity = new ClampedFloatParameter(0, 0, 1);
+        public ClampedFloatParameter ditherStrength = new ClampedFloatParameter(0, 0, 1);
 
         #endregion
 
@@ -87,7 +88,8 @@ namespace Kino.PostProcessing
 
             _material.SetColor(ShaderIDs.EdgeColor, edgeColor.value);
             _material.SetVector(ShaderIDs.EdgeThresholds, edgeThresh);
-            _material.SetFloat(ShaderIDs.FillOpacity, fillOpacity.value);
+            _material.SetVector(ShaderIDs.FillOpacity,
+                new Vector2(fillOpacity.value, ditherStrength.value));
             GradientUtility.SetColorKeys(_material, _gradientCache);
 
             var pass = (int)edgeSource.value;
