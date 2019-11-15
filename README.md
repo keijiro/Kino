@@ -44,9 +44,13 @@ subliminal level.
 
 A simple sharpen filter that is similar to ones used in paint software.
 
-### Invert
+### Utility
 
-A simple color inversion filter.
+A multi-purpose filter that provides several small effects in a single pass.
+
+- Hue shift
+- Invert
+- Fade (fade to color)
 
 How To Install
 --------------

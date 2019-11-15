@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8083794669176456137
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4b23de600908be4c83dca2c48edef63, type: 3}
+  m_Name: Utility
+  m_EditorClassIdentifier: 
+  active: 0
+  m_AdvancedMode: 0
+  hueShift:
+    m_OverrideState: 0
+    m_Value: 0
+    min: -1
+    max: 1
+  invert:
+    m_OverrideState: 0
+    m_Value: 0
+    min: 0
+    max: 1
+  fade:
+    m_OverrideState: 0
+    m_Value: {r: 0, g: 0, b: 0, a: 0}
+    hdr: 0
+    showAlpha: 1
+    showEyeDropper: 1
 --- !u!114 &-7849751576115427797
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -103,6 +133,7 @@ MonoBehaviour:
   - {fileID: -2273157520953530628}
   - {fileID: -7849751576115427797}
   - {fileID: 1056141061363657763}
+  - {fileID: -8083794669176456137}
 --- !u!114 &1056141061363657763
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -119,7 +150,7 @@ MonoBehaviour:
   m_AdvancedMode: 0
   edgeColor:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 1, b: 1, a: 1}
+    m_Value: {r: 1, g: 0, b: 0, a: 0.64705884}
     hdr: 0
     showAlpha: 1
     showEyeDropper: 1
@@ -148,7 +179,7 @@ MonoBehaviour:
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 29298
+      ctime0: 19661
       ctime1: 65535
       ctime2: 0
       ctime3: 0
@@ -170,5 +201,13 @@ MonoBehaviour:
   fillOpacity:
     m_OverrideState: 1
     m_Value: 1
+    min: 0
+    max: 1
+  ditherType:
+    m_OverrideState: 1
+    m_Value: 3
+  ditherStrength:
+    m_OverrideState: 1
+    m_Value: 0.574
     min: 0
     max: 1
