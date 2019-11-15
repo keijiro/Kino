@@ -8,6 +8,6 @@
     "name": "jp.keijiro.kino.post-processing",
     "repository": "github:keijiro/Kino",
     "unity": "2019.3",
-    "unityRelease": "0b5",
-    "version": "2.0.1"
+    "unityRelease": "0b8",
+    "version": "2.1.0"
 }
