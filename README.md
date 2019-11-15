@@ -40,6 +40,18 @@ to add contour lines to the images.
 process. It's handy to widen the color spectrum of the output in a nearly
 subliminal level.
 
+### Glitch
+
+![gif](https://i.imgur.com/bCLcgBi.gif)
+![gif](https://i.imgur.com/kw85Pim.gif)
+
+**Glitch** is a collection of simple video glitch effects.
+
+- Drift (color drift effect)
+- Jitter (scan line jitter effect)
+- Jump (vertical jump effect)
+- Shake (horizontal shake effect)
+
 ### Sharpen
 
 A simple sharpen filter that is similar to ones used in paint software.
