@@ -62,11 +62,11 @@ namespace Kino.PostProcessing
             var block3 = block.value * block.value * block.value;
 
             // Shuffle block parameters every 1/30 seconds.
-            _blockTime += delta * 30;
+            _blockTime += delta * 60;
             if (_blockTime > 1)
             {
-                if (Random.value < 0.12f) _blockSeed1 += 251;
-                if (Random.value < 0.31f) _blockSeed2 += 373;
+                if (Random.value < 0.09f) _blockSeed1 += 251;
+                if (Random.value < 0.29f) _blockSeed2 += 373;
                 if (Random.value < 0.25f) _blockStride = Random.Range(1, 32);
                 _blockTime = 0;
             }
@@ -98,7 +98,14 @@ namespace Kino.PostProcessing
             _material.SetVector(ShaderIDs.Jump, vjump);
             _material.SetFloat(ShaderIDs.Shake, shake.value * 0.2f);
             _material.SetTexture(ShaderIDs.InputTexture, srcRT);
-            HDUtils.DrawFullScreen(cmd, _material, destRT);
+
+            // Shader pass number
+            var pass = 0;
+            if (drift.value > 0 || jitter.value > 0 || jump.value > 0 || shake.value > 0) pass += 1;
+            if (block.value > 0) pass += 2;
+
+            // Blit
+            HDUtils.DrawFullScreen(cmd, _material, destRT, null, pass);
         }
 
         public override void Cleanup()
