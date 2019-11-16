@@ -47,6 +47,7 @@ subliminal level.
 
 **Glitch** is a collection of simple video glitch effects.
 
+- Block (block noise effect)
 - Drift (color drift effect)
 - Jitter (scan line jitter effect)
 - Jump (vertical jump effect)
