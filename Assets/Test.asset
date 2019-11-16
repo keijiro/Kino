@@ -21,7 +21,7 @@ MonoBehaviour:
     max: 1
   invert:
     m_OverrideState: 0
-    m_Value: 0
+    m_Value: 1
     min: 0
     max: 1
   fade:
@@ -82,6 +82,45 @@ MonoBehaviour:
   m_HighQualityFiltering:
     m_OverrideState: 0
     m_Value: 1
+--- !u!114 &-6827597505472674435
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 090e3e4eec7ad5a47b778575e0ede947, type: 3}
+  m_Name: Glitch
+  m_EditorClassIdentifier: 
+  active: 1
+  m_AdvancedMode: 0
+  block:
+    m_OverrideState: 1
+    m_Value: 0.5
+    min: 0
+    max: 1
+  drift:
+    m_OverrideState: 1
+    m_Value: 0.1
+    min: 0
+    max: 1
+  jitter:
+    m_OverrideState: 0
+    m_Value: 0
+    min: 0
+    max: 1
+  jump:
+    m_OverrideState: 0
+    m_Value: 0
+    min: 0
+    max: 1
+  shake:
+    m_OverrideState: 0
+    m_Value: 0
+    min: 0
+    max: 1
 --- !u!114 &-2273157520953530628
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -134,6 +173,7 @@ MonoBehaviour:
   - {fileID: -7849751576115427797}
   - {fileID: 1056141061363657763}
   - {fileID: -8083794669176456137}
+  - {fileID: -6827597505472674435}
 --- !u!114 &1056141061363657763
 MonoBehaviour:
   m_ObjectHideFlags: 3
