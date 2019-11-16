@@ -47,6 +47,7 @@ subliminal level.
 
 **Glitch** is a collection of simple video glitch effects.
 
+- Block (block noise effect)
 - Drift (color drift effect)
 - Jitter (scan line jitter effect)
 - Jump (vertical jump effect)
@@ -84,7 +85,7 @@ To the `scopedRegistries` section:
 To the `dependencies` section:
 
 ```
-"jp.keijiro.kino.post-processing": "2.1.1"
+"jp.keijiro.kino.post-processing": "2.1.2"
 ```
 
 After changes, the manifest file should look like below:
@@ -99,7 +100,7 @@ After changes, the manifest file should look like below:
     }
   ],
   "dependencies": {
-    "jp.keijiro.kino.post-processing": "2.1.1",
+    "jp.keijiro.kino.post-processing": "2.1.2",
     ...
 ```
 
