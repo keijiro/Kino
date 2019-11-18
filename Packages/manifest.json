@@ -11,7 +11,6 @@
   "dependencies": {
     "jp.keijiro.danish-statues": "0.0.4",
     "jp.keijiro.test-assets": "0.0.2",
-    "com.unity.render-pipelines.high-definition": "7.1.2",
     "com.unity.modules.imageconversion": "1.0.0",
     "com.unity.modules.physics": "1.0.0",
     "com.unity.modules.physics2d": "1.0.0",
