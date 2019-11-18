@@ -81,13 +81,17 @@ float4 Fragment(Varyings input) : SV_Target
 
 #endif
 
-#ifdef RECOLOR_EDGE_DEPTH
+#if defined(RECOLOR_EDGE_DEPTH) || defined(RECOLOR_EDGE_NORMAL)
 
     // Depth samples
     float d0 = LoadCameraDepth(uv0);
     float d1 = LoadCameraDepth(uv1);
     float d2 = LoadCameraDepth(uv2);
     float d3 = LoadCameraDepth(uv3);
+
+#endif
+
+#ifdef RECOLOR_EDGE_DEPTH
 
     // Roberts cross operator
     float g = length(float2(d1 - d0, d3 - d2)) * 100;
@@ -101,6 +105,13 @@ float4 Fragment(Varyings input) : SV_Target
     float3 n1 = LoadWorldNormal(uv1);
     float3 n2 = LoadWorldNormal(uv2);
     float3 n3 = LoadWorldNormal(uv3);
+
+    // Background removal
+#if UNITY_REVERSED_Z
+    n0 *= d0 > 0; n1 *= d1 > 0; n2 *= d2 > 0; n3 *= d3 > 0;
+#else
+    n0 *= d0 < 0; n1 *= d1 < 1; n2 *= d2 < 1; n3 *= d3 < 1;
+#endif
 
     // Roberts cross operator
     float3 g1 = n1 - n0;
