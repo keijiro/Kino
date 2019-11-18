@@ -75,7 +75,7 @@ namespace Kino.PostProcessing
 
         public override void Render(CommandBuffer cmd, HDCamera camera, RTHandle srcRT, RTHandle destRT)
         {
-            if (_ditherType != ditherType.value)
+            if (_ditherType != ditherType.value || _ditherTexture == null)
             {
                 CoreUtils.Destroy(_ditherTexture);
                 _ditherType = ditherType.value;
