@@ -32,6 +32,7 @@ Shader "Hidden/Kino/PostProcess/Utility"
     float4 _FadeColor;
     float _HueShift;
     float _Invert;
+    float _Saturation;
     TEXTURE2D_X(_InputTexture);
 
     float4 Fragment(Varyings input) : SV_Target
@@ -40,7 +41,13 @@ Shader "Hidden/Kino/PostProcess/Utility"
 
         uint2 positionSS = input.texcoord * _ScreenSize.xy;
         float4 c = LOAD_TEXTURE2D_X(_InputTexture, positionSS);
-        float3 rgb = LinearToSRGB(c.rgb);
+        float3 rgb = c.rgb;
+
+        // Saturation
+        rgb = max(0, lerp(Luminance(rgb), rgb, _Saturation));
+
+        // Linear -> sRGB
+        rgb = LinearToSRGB(rgb);
 
         // Hue shift
         float3 hsv = RgbToHsv(rgb);
@@ -53,7 +60,9 @@ Shader "Hidden/Kino/PostProcess/Utility"
         // Fade
         rgb = lerp(rgb, _FadeColor.rgb, _FadeColor.a);
 
+        // sRGB -> Linear
         c.rgb = SRGBToLinear(rgb);
+
         return c;
     }
 
