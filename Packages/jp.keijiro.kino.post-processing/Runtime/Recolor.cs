@@ -111,7 +111,7 @@ namespace Kino.PostProcessing
             _material.SetFloat(ShaderIDs.DitherStrength, ditherStrength.value);
 
             var pass = (int)edgeSource.value;
-            if (fillOpacity.value > 0 && _gradientCache.Length > 3) pass += 3;
+            if (fillOpacity.value > 0 && _gradientCache.Length > 4) pass += 3;
             if (fillGradient.value.mode == GradientMode.Blend) pass += 6;
 
             // Blit to destRT with the overlay shader.
