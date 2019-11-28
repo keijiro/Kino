@@ -44,7 +44,9 @@ namespace Kino.PostProcessing
         }
 
         Material _material;
-        GradientColorKey[] _gradientCache;
+
+        Gradient _cachedGradient;
+        GradientColorKey [] _cachedColorKeys;
 
         DitherType _ditherType;
         Texture2D _ditherTexture;
@@ -66,11 +68,6 @@ namespace Kino.PostProcessing
         public override void Setup()
         {
             _material = CoreUtils.CreateEngineMaterial("Hidden/Kino/PostProcess/Recolor");
-
-        #if !UNITY_EDITOR
-            // At runtime, copy gradient color keys only once on initialization.
-            _gradientCache = fillGradient.value.colorKeys;
-        #endif
         }
 
         public override void Render(CommandBuffer cmd, HDCamera camera, RTHandle srcRT, RTHandle destRT)
@@ -82,14 +79,23 @@ namespace Kino.PostProcessing
                 _ditherTexture = GenerateDitherTexture(_ditherType);
             }
 
-        #if UNITY_EDITOR
-            // In editor, copy gradient color keys every frame.
-            _gradientCache = fillGradient.value.colorKeys;
-        #endif
+#if UNITY_EDITOR
+            // In Editor, the gradient will be modified without any hint,
+            // so we have to copy the color keys every frame.
+            if (true)
+#else
+            // In Player, we assume no one can modify gradients in profiles,
+            // so we update the cache only when the reference was updated.
+            if (_cachedGradient != fillGradient.value)
+#endif
+            {
+                _cachedGradient = fillGradient.value;
+                _cachedColorKeys = _cachedGradient.colorKeys;
+            }
 
             Vector2 edgeThresh;
 
-            if (edgeSource == EdgeSource.Depth)
+            if (edgeSource.value == EdgeSource.Depth)
             {
                 var thresh = 1 / Mathf.Lerp(1000, 1, edgeThreshold.value);
                 var scaler = 1 + 2 / (1.01f - edgeContrast.value);
@@ -105,13 +111,13 @@ namespace Kino.PostProcessing
             _material.SetColor(ShaderIDs.EdgeColor, edgeColor.value);
             _material.SetVector(ShaderIDs.EdgeThresholds, edgeThresh);
             _material.SetFloat(ShaderIDs.FillOpacity, fillOpacity.value);
-            GradientUtility.SetColorKeys(_material, _gradientCache);
+            GradientUtility.SetColorKeys(_material, _cachedColorKeys);
 
             _material.SetTexture(ShaderIDs.DitherTexture, _ditherTexture);
             _material.SetFloat(ShaderIDs.DitherStrength, ditherStrength.value);
 
             var pass = (int)edgeSource.value;
-            if (fillOpacity.value > 0 && _gradientCache.Length > 4) pass += 3;
+            if (fillOpacity.value > 0 && _cachedColorKeys.Length > 4) pass += 3;
             if (fillGradient.value.mode == GradientMode.Blend) pass += 6;
 
             // Blit to destRT with the overlay shader.
