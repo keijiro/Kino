@@ -65,6 +65,18 @@ A multi-purpose filter that provides several small effects in a single pass.
 - Invert
 - Fade (fade to color)
 
+### Slice
+
+![Slice](https://i.imgur.com/UdZvhqo.gif)
+
+Slice and slide effect.
+
+### Test Card
+
+![Test Card](https://i.imgur.com/9kP6UFam.jpg)
+
+A simple test card pattern generator.
+
 How To Install
 --------------
 
