@@ -97,7 +97,7 @@ To the `scopedRegistries` section:
 To the `dependencies` section:
 
 ```
-"jp.keijiro.kino.post-processing": "2.1.11"
+"jp.keijiro.kino.post-processing": "2.1.12"
 ```
 
 After changes, the manifest file should look like below:
@@ -112,7 +112,7 @@ After changes, the manifest file should look like below:
     }
   ],
   "dependencies": {
-    "jp.keijiro.kino.post-processing": "2.1.11",
+    "jp.keijiro.kino.post-processing": "2.1.12",
     ...
 ```
 

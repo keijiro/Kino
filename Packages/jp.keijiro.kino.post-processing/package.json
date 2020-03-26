@@ -1,6 +1,6 @@
 {
     "author": "Keijiro Takahashi",
-    "dependencies": { "com.unity.render-pipelines.high-definition": "7.1.8" },
+    "dependencies": { "com.unity.render-pipelines.high-definition": "7.3.1" },
     "description": "Custom post processing effect collection for HDRP",
     "displayName": "Kino",
     "keywords": [ "unity" ],
@@ -9,5 +9,5 @@
     "repository": "github:keijiro/Kino",
     "unity": "2019.3",
     "unityRelease": "0f3",
-    "version": "2.1.11"
+    "version": "2.1.12"
 }
