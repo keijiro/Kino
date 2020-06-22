@@ -124,7 +124,7 @@ Frequently Asked Questions
 #### Nothing happens when I add effects to a volume
 
 Check the Default HDRP Settings in the Project Settings. You have to
-define custom post processing oerders to make them take effect in the
+define custom post processing orders to make them take effect in the
 pipeline.
 
 ![HDRP settings](https://i.imgur.com/v6Kddthl.jpg)
