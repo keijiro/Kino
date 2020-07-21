@@ -97,7 +97,7 @@ To the `scopedRegistries` section:
 To the `dependencies` section:
 
 ```
-"jp.keijiro.kino.post-processing": "2.1.13"
+"jp.keijiro.kino.post-processing": "2.1.14"
 ```
 
 After changes, the manifest file should look like below:
@@ -112,7 +112,7 @@ After changes, the manifest file should look like below:
     }
   ],
   "dependencies": {
-    "jp.keijiro.kino.post-processing": "2.1.13",
+    "jp.keijiro.kino.post-processing": "2.1.14",
     ...
 ```
 
@@ -124,7 +124,7 @@ Frequently Asked Questions
 #### Nothing happens when I add effects to a volume
 
 Check the Default HDRP Settings in the Project Settings. You have to
-define custom post processing oerders to make them take effect in the
+define custom post processing orders to make them take effect in the
 pipeline.
 
 ![HDRP settings](https://i.imgur.com/v6Kddthl.jpg)
