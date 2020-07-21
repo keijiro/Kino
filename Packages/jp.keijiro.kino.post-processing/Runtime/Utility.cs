@@ -11,11 +11,13 @@ namespace Kino.PostProcessing
         public ClampedFloatParameter hueShift = new ClampedFloatParameter(0, -1, 1);
         public ClampedFloatParameter invert = new ClampedFloatParameter(0, 0, 1);
         public ColorParameter fade = new ColorParameter(new Color(0, 0, 0, 0), false, true, true);
+        public BoolParameter clearAlpha = new BoolParameter(false);
 
         Material _material;
 
         static class ShaderIDs
         {
+            internal static readonly int Alpha = Shader.PropertyToID("_Alpha");
             internal static readonly int FadeColor = Shader.PropertyToID("_FadeColor");
             internal static readonly int HueShift = Shader.PropertyToID("_HueShift");
             internal static readonly int InputTexture = Shader.PropertyToID("_InputTexture");
@@ -38,6 +40,7 @@ namespace Kino.PostProcessing
         {
             if (_material == null) return;
 
+            _material.SetFloat(ShaderIDs.Alpha, clearAlpha.value ? 1 : 0);
             _material.SetColor(ShaderIDs.FadeColor, fade.value);
             _material.SetFloat(ShaderIDs.HueShift, hueShift.value);
             _material.SetFloat(ShaderIDs.Invert, invert.value);
