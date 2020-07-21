@@ -33,7 +33,6 @@ Shader "Hidden/Kino/PostProcess/Utility"
     float _HueShift;
     float _Invert;
     float _Saturation;
-    float _Alpha;
     TEXTURE2D_X(_InputTexture);
 
     float4 Fragment(Varyings input) : SV_Target
@@ -63,9 +62,6 @@ Shader "Hidden/Kino/PostProcess/Utility"
 
         // sRGB -> Linear
         c.rgb = SRGBToLinear(rgb);
-
-        // Alpha clear
-        c.a = lerp(c.a, 1, _Alpha);
 
         return c;
     }

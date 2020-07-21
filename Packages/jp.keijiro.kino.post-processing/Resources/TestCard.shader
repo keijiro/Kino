@@ -83,9 +83,6 @@ Shader "Hidden/Kino/PostProcess/TestCard"
         c.rgb = lerp(c.rgb, TestPattern(input.texcoord), _Opacity);
         c.rgb = SRGBToLinear(c.rgb);
 
-        // Alpha channel blending
-        c.a = lerp(c.a, 1, _Opacity);
-
         return c;
     }
 
