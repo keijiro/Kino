@@ -10,6 +10,10 @@
   ],
   "dependencies": {
     "jp.keijiro.danish-statues": "0.0.4",
-    "jp.keijiro.test-assets": "1.0.1"
+    "jp.keijiro.test-assets": "1.0.1",
+    "com.unity.modules.animation": "1.0.0",
+    "com.unity.modules.imageconversion": "1.0.0",
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.uielements": "1.0.0"
   }
 }
