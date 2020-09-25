@@ -38,6 +38,18 @@ namespace Kino.PostProcessing
             Shader.PropertyToID("_ColorKey7")
         };
 
+        static readonly int[] _alphaKeyPropertyIDs = new[]
+{
+            Shader.PropertyToID("_AlphaKey0"),
+            Shader.PropertyToID("_AlphaKey1"),
+            Shader.PropertyToID("_AlphaKey2"),
+            Shader.PropertyToID("_AlphaKey3"),
+            Shader.PropertyToID("_AlphaKey4"),
+            Shader.PropertyToID("_AlphaKey5"),
+            Shader.PropertyToID("_AlphaKey6"),
+            Shader.PropertyToID("_AlphaKey7")
+        };
+
         public static Gradient DefaultGradient {
             get {
                 var g = new Gradient();
@@ -51,12 +63,25 @@ namespace Kino.PostProcessing
             return _colorKeyPropertyIDs[index];
         }
 
+        public static int GetAlphaKeyPropertyID(int index)
+        {
+            return _alphaKeyPropertyIDs[index];
+        }
+
         public static void SetColorKeys(Material material, GradientColorKey[] colorKeys)
         {
             for (var i = 0; i < 8; i++)
                 material.SetVector(
                     GetColorKeyPropertyID(i),
                     colorKeys[Mathf.Min(i, colorKeys.Length - 1)].ToVector()
+                );
+        }
+
+        public static void SetAlphaKeys(Material material, GradientAlphaKey[] alphaKeys)
+        {
+            for (var i = 0; i < 8; i++)
+                material.SetVector(
+                    GetAlphaKeyPropertyID(i),new Vector4(alphaKeys[Mathf.Min(i, alphaKeys.Length - 1)].alpha,0,0, alphaKeys[Mathf.Min(i, alphaKeys.Length - 1)].time)
                 );
         }
     }

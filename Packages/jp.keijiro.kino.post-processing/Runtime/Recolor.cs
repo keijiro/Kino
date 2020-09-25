@@ -47,6 +47,7 @@ namespace Kino.PostProcessing
 
         Gradient _cachedGradient;
         GradientColorKey [] _cachedColorKeys;
+        GradientAlphaKey[] _cachedAlphaKeys;
 
         DitherType _ditherType;
         Texture2D _ditherTexture;
@@ -91,6 +92,7 @@ namespace Kino.PostProcessing
             {
                 _cachedGradient = fillGradient.value;
                 _cachedColorKeys = _cachedGradient.colorKeys;
+                _cachedAlphaKeys = _cachedGradient.alphaKeys;
             }
 
             Vector2 edgeThresh;
@@ -112,6 +114,7 @@ namespace Kino.PostProcessing
             _material.SetVector(ShaderIDs.EdgeThresholds, edgeThresh);
             _material.SetFloat(ShaderIDs.FillOpacity, fillOpacity.value);
             GradientUtility.SetColorKeys(_material, _cachedColorKeys);
+            GradientUtility.SetAlphaKeys(_material, _cachedAlphaKeys);
 
             _material.SetTexture(ShaderIDs.DitherTexture, _ditherTexture);
             _material.SetFloat(ShaderIDs.DitherStrength, ditherStrength.value);
