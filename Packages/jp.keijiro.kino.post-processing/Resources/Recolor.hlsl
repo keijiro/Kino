@@ -165,9 +165,9 @@ float4 Fragment(Varyings input) : SV_Target
     fill = lum > _ColorKey1.w ? _ColorKey2.rgb : fill;
     fill = lum > _ColorKey2.w ? _ColorKey3.rgb : fill;
 
-    fill = lum > _AlphaKey0.w ? _AlphaKey1.rgb : fillAlpha;
-    fill = lum > _AlphaKey1.w ? _AlphaKey2.rgb : fillAlpha;
-    fill = lum > _AlphaKey2.w ? _AlphaKey3.rgb : fillAlpha;
+    fillAlpha = lum > _AlphaKey0.w ? _AlphaKey1.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey1.w ? _AlphaKey2.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey2.w ? _AlphaKey3.r : fillAlpha;
 
     #ifdef RECOLOR_GRADIENT_EXT
     fill = lum > _ColorKey3.w ? _ColorKey4.rgb : fill;
@@ -175,10 +175,10 @@ float4 Fragment(Varyings input) : SV_Target
     fill = lum > _ColorKey5.w ? _ColorKey6.rgb : fill;
     fill = lum > _ColorKey6.w ? _ColorKey7.rgb : fill;
 
-	fill = lum > _AlphaKey3.w ? _AlphaKey4.rgb : fillAlpha;
-    fill = lum > _AlphaKey4.w ? _AlphaKey5.rgb : fillAlpha;
-    fill = lum > _AlphaKey5.w ? _AlphaKey6.rgb : fillAlpha;
-    fill = lum > _AlphaKey6.w ? _AlphaKey7.rgb : fillAlpha;
+	fillAlpha = lum > _AlphaKey3.w ? _AlphaKey4.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey4.w ? _AlphaKey5.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey5.w ? _AlphaKey6.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey6.w ? _AlphaKey7.r : fillAlpha;
     #endif
 #endif
 
