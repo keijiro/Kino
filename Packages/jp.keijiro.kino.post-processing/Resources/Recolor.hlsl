@@ -41,6 +41,15 @@ float4 _ColorKey5;
 float4 _ColorKey6;
 float4 _ColorKey7;
 
+float4 _AlphaKey0;
+float4 _AlphaKey1;
+float4 _AlphaKey2;
+float4 _AlphaKey3;
+float4 _AlphaKey4;
+float4 _AlphaKey5;
+float4 _AlphaKey6;
+float4 _AlphaKey7;
+
 TEXTURE2D(_DitherTexture);
 float _DitherStrength;
 
@@ -126,34 +135,55 @@ float4 Fragment(Varyings input) : SV_Target
     float dither = LOAD_TEXTURE2D(_DitherTexture, positionSS % uint2(tw, th)).x;
     dither = (dither - 0.5) * _DitherStrength;
 
-    // Apply fill gradient.
-    float3 fill = _ColorKey0.rgb;
-    float lum = Luminance(c0.rgb) + dither;
+	// Apply fill gradient.
+	float3 fill = _ColorKey0.rgb;
+	float fillAlpha = _AlphaKey0.r;
+	float lum = Luminance(c0.rgb) + dither;
 
 #ifdef RECOLOR_GRADIENT_LERP
-    fill = lerp(fill, _ColorKey1.rgb, saturate((lum - _ColorKey0.w) / (_ColorKey1.w - _ColorKey0.w)));
-    fill = lerp(fill, _ColorKey2.rgb, saturate((lum - _ColorKey1.w) / (_ColorKey2.w - _ColorKey1.w)));
-    fill = lerp(fill, _ColorKey3.rgb, saturate((lum - _ColorKey2.w) / (_ColorKey3.w - _ColorKey2.w)));
-    #ifdef RECOLOR_GRADIENT_EXT
-    fill = lerp(fill, _ColorKey4.rgb, saturate((lum - _ColorKey3.w) / (_ColorKey4.w - _ColorKey3.w)));
-    fill = lerp(fill, _ColorKey5.rgb, saturate((lum - _ColorKey4.w) / (_ColorKey5.w - _ColorKey4.w)));
-    fill = lerp(fill, _ColorKey6.rgb, saturate((lum - _ColorKey5.w) / (_ColorKey6.w - _ColorKey5.w)));
-    fill = lerp(fill, _ColorKey7.rgb, saturate((lum - _ColorKey6.w) / (_ColorKey7.w - _ColorKey6.w)));
-    #endif
+	fill = lerp(fill, _ColorKey1.rgb, saturate((lum - _ColorKey0.w) / (_ColorKey1.w - _ColorKey0.w)));
+	fill = lerp(fill, _ColorKey2.rgb, saturate((lum - _ColorKey1.w) / (_ColorKey2.w - _ColorKey1.w)));
+	fill = lerp(fill, _ColorKey3.rgb, saturate((lum - _ColorKey2.w) / (_ColorKey3.w - _ColorKey2.w)));
+
+	fillAlpha = lerp(fillAlpha, _AlphaKey1.r, saturate((lum - _AlphaKey0.w) / (_AlphaKey1.w - _AlphaKey0.w)));
+	fillAlpha = lerp(fillAlpha, _AlphaKey2.r, saturate((lum - _AlphaKey1.w) / (_AlphaKey2.w - _AlphaKey1.w)));
+	fillAlpha = lerp(fillAlpha, _AlphaKey3.r, saturate((lum - _AlphaKey2.w) / (_AlphaKey3.w - _AlphaKey2.w)));
+
+	#ifdef RECOLOR_GRADIENT_EXT
+		fill = lerp(fill, _ColorKey4.rgb, saturate((lum - _ColorKey3.w) / (_ColorKey4.w - _ColorKey3.w)));
+		fill = lerp(fill, _ColorKey5.rgb, saturate((lum - _ColorKey4.w) / (_ColorKey5.w - _ColorKey4.w)));
+		fill = lerp(fill, _ColorKey6.rgb, saturate((lum - _ColorKey5.w) / (_ColorKey6.w - _ColorKey5.w)));
+		fill = lerp(fill, _ColorKey7.rgb, saturate((lum - _ColorKey6.w) / (_ColorKey7.w - _ColorKey6.w)));
+
+		fillAlpha = lerp(fillAlpha, _AlphaKey4.r, saturate((lum - _AlphaKey3.w) / (_AlphaKey4.w - _AlphaKey3.w)));
+		fillAlpha = lerp(fillAlpha, _AlphaKey5.r, saturate((lum - _AlphaKey4.w) / (_AlphaKey5.w - _AlphaKey4.w)));
+		fillAlpha = lerp(fillAlpha, _AlphaKey6.r, saturate((lum - _AlphaKey5.w) / (_AlphaKey6.w - _AlphaKey5.w)));
+		fillAlpha = lerp(fillAlpha, _AlphaKey7.r, saturate((lum - _AlphaKey6.w) / (_AlphaKey7.w - _AlphaKey6.w)));
+	#endif
 #else
     fill = lum > _ColorKey0.w ? _ColorKey1.rgb : fill;
     fill = lum > _ColorKey1.w ? _ColorKey2.rgb : fill;
     fill = lum > _ColorKey2.w ? _ColorKey3.rgb : fill;
+
+    fillAlpha = lum > _AlphaKey0.w ? _AlphaKey1.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey1.w ? _AlphaKey2.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey2.w ? _AlphaKey3.r : fillAlpha;
+
     #ifdef RECOLOR_GRADIENT_EXT
     fill = lum > _ColorKey3.w ? _ColorKey4.rgb : fill;
     fill = lum > _ColorKey4.w ? _ColorKey5.rgb : fill;
     fill = lum > _ColorKey5.w ? _ColorKey6.rgb : fill;
     fill = lum > _ColorKey6.w ? _ColorKey7.rgb : fill;
+
+	fillAlpha = lum > _AlphaKey3.w ? _AlphaKey4.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey4.w ? _AlphaKey5.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey5.w ? _AlphaKey6.r : fillAlpha;
+    fillAlpha = lum > _AlphaKey6.w ? _AlphaKey7.r : fillAlpha;
     #endif
 #endif
 
-    float edge = smoothstep(_EdgeThresholds.x, _EdgeThresholds.y, g);
-    float3 cb = lerp(c0.rgb, fill, _FillOpacity);
-    float3 co = lerp(cb, _EdgeColor.rgb, edge * _EdgeColor.a);
-    return float4(co, c0.a);
+	float edge = smoothstep(_EdgeThresholds.x, _EdgeThresholds.y, g);
+	float3 cb = lerp(c0.rgb, fill.rgb, _FillOpacity * fillAlpha);
+	float3 co = lerp(cb, _EdgeColor.rgb, edge * _EdgeColor.a);
+	return float4(co, c0.a);
 }
